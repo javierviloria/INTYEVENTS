@@ -1,0 +1,2536 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+  <title>INTYLACT® | Gestión y Registro de Eventos</title>
+  
+  <!-- Soporte Apple iOS / iPadOS (Safari) -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="INTYEVENTS">
+  <link rel="apple-touch-icon" href="BANNER.jpeg">
+  <meta name="format-detection" content="telephone=no">
+
+  <!-- Soporte Google Android (Chrome) & PWA -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#FAF7F2">
+  <meta name="application-name" content="INTYLACT® Eventos">
+  <link rel="manifest" href="manifest.json">
+
+  <!-- Favicon corporativo -->
+  <link rel="icon" type="image/jpeg" href="BANNER.jpeg">
+
+  <!-- Tipografía Corporativa Oficial: Neue Machina Bold -->
+  <link rel="preload" href="fonts/NeueMachina-Bold.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/NeueMachina-Regular.woff2" as="font" type="font/woff2" crossorigin>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ["'Neue Machina Bold'", "'Neue Machina'", 'sans-serif'],
+            display: ["'Neue Machina Bold'", "'Neue Machina'", 'sans-serif'],
+            bold: ["'Neue Machina Bold'", "'Neue Machina'", 'sans-serif']
+          },
+          colors: {
+            inty: {
+              pink: '#d87a86',
+              'pink-dark': '#ba5763',
+              'pink-light': '#faebee',
+              'pink-soft': '#f4d3d8',
+              dark: '#0f3042',
+              'dark-muted': '#2d556e',
+              'dark-surface': '#163f53',
+              bg: '#faf7f2',
+              cream: '#fffdfa',
+              gold: '#e5b850',
+              cyan: '#5fa8bc'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Font Awesome 6 Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- SheetJS para Exportación a Excel (.xlsx) -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+  <!-- Canvas Confetti para Celebración -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <!-- Hoja de Estilos Personalizada -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-[#faf7f2] text-[#0f3042] min-h-screen flex flex-col font-['Neue_Machina_Bold','Neue_Machina',sans-serif] selection:bg-[#d87a86] selection:text-white">
+
+  <!-- ============================================================== -->
+  <!-- BARRA DE NAVEGACIÓN SUPERIOR (Visible en Dashboard y Admin)    -->
+  <!-- ============================================================== -->
+  <header id="main-navbar" class="bg-white/95 backdrop-blur-md sticky top-0 z-40 border-b border-[#ede6de] shadow-xs py-2 sm:py-3">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between min-h-[4.5rem] sm:min-h-[5.25rem] gap-2 lg:gap-3">
+        
+        <!-- Logo e Isotipo Oficial INTYLACT (Transparente y sin fondo rectangular) -->
+        <div class="flex items-center gap-2 cursor-pointer py-1 flex-shrink-0" onclick="navigateTo(AppState.currentUser?.role === 'admin' ? 'admin' : (AppState.currentUser ? 'dashboard-events' : 'landing'))">
+          <img src="LOGO_TRANSPARENT.png" alt="INTYLACT - La marca #1 de cuidado íntimo en Venezuela" class="banner-nav hover:scale-[1.02]">
+        </div>
+
+        <!-- Pestañas Principales Adaptativas según Rol (Ocultas en Página Principal; Solo visibles tras iniciar sesión) -->
+        <nav id="nav-user-tabs" style="display: none;" class="hidden items-center gap-0.5 sm:gap-1">
+          <!-- Pestaña 1: Eventos (Visible tanto para Usuarios como para Administrador) -->
+          <button id="tab-btn-events" onclick="navigateTo('dashboard-events')" class="px-3 lg:px-4 py-2 text-xs lg:text-sm font-bold text-[#d87a86] border-b-2 border-[#d87a86] transition-all flex items-center whitespace-nowrap">
+            Eventos
+          </button>
+          
+          <!-- Pestaña 2: Solicitud de Eventos (SOLO VISIBLE PARA USUARIOS GENERALES TRAS INICIAR SESIÓN) -->
+          <button id="tab-btn-wizard" onclick="navigateTo('dashboard-wizard')" class="px-3 lg:px-4 py-2 text-xs lg:text-sm font-medium text-[#7b8893] hover:text-[#0f3042] transition-all flex items-center whitespace-nowrap">
+            Solicitud de Eventos
+          </button>
+
+          <!-- Cuarta Sección: Panel de Administración (SOLO VISIBLE PARA ADMINISTRADOR CUANDO INICIE SESIÓN) -->
+          <button id="tab-btn-admin" style="display: none;" onclick="navigateTo('admin')" class="hidden px-3 lg:px-4 py-2 text-xs lg:text-sm font-medium text-[#7b8893] hover:text-[#0f3042] transition-all flex items-center whitespace-nowrap">
+            Resultados y Leads
+          </button>
+
+          <!-- Nueva Sección: Logística y Paquetes (SOLO VISIBLE PARA ADMINISTRADOR CUANDO INICIE SESIÓN) -->
+          <button id="tab-btn-logistics" style="display: none;" onclick="navigateTo('logistics')" class="hidden px-3 lg:px-4 py-2 text-xs lg:text-sm font-medium text-[#7b8893] hover:text-[#0f3042] transition-all flex items-center whitespace-nowrap">
+            Logística
+          </button>
+
+          <!-- Nueva Sección: Etiquetado de Cajas (SOLO VISIBLE PARA ADMINISTRADOR CUANDO INICIE SESIÓN) -->
+          <button id="tab-btn-labeling" style="display: none;" onclick="navigateTo('labeling')" class="hidden px-3 lg:px-4 py-2 text-xs lg:text-sm font-medium text-[#7b8893] hover:text-[#0f3042] transition-all flex items-center whitespace-nowrap">
+            Etiquetado
+          </button>
+        </nav>
+
+        <!-- Controles de Usuario y Acciones -->
+        <div class="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
+          
+          <!-- Botón de Conexión Móvil con Link Directo (Solo texto, sin icono) -->
+          <button onclick="openMobileConnectModal()" class="text-xs font-semibold text-[#0f3042] bg-[#faf7f2] hover:bg-[#faebee] border border-[#ede6de] px-2.5 py-1.5 rounded-lg transition-colors shadow-2xs whitespace-nowrap" title="Abrir con Link Directo en celular Android o Apple iPhone">
+            <span class="inline">Link Celular</span>
+          </button>
+
+          <!-- Botón de Acceso Admin si está en Landing (Solo texto, sin icono) -->
+          <div id="nav-landing-actions">
+            <button onclick="openAdminLoginModal()" class="text-xs font-semibold text-[#0f3042] bg-[#faebee] hover:bg-[#f4d3d8] px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap">
+              <span>Acceso Administrador</span>
+            </button>
+          </div>
+
+          <!-- Perfil de Usuario Logueado con Botón Cerrar Sesión -->
+          <div id="nav-user-profile" class="hidden flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
+            <div class="flex items-center gap-1.5 sm:gap-2 bg-gray-50 border border-gray-200 py-1 px-2 sm:px-2.5 rounded-full max-w-[150px] sm:max-w-[200px]">
+              <img id="nav-user-avatar" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100" alt="Avatar" class="w-6 h-6 sm:w-7 sm:h-7 rounded-full object-cover border border-[#d87a86] shrink-0">
+              <div class="text-left pr-1 min-w-0">
+                <span id="nav-user-name" class="block text-xs font-bold text-[#0f3042] leading-tight truncate">Usuario</span>
+                <span id="nav-user-email" class="hidden xl:block text-[9.5px] text-gray-400 leading-none truncate">email</span>
+              </div>
+            </div>
+
+            <!-- Botón Cerrar Sesión Visible (Solo texto, sin icono) -->
+            <button onclick="logout()" class="text-xs font-bold text-rose-600 bg-rose-50 hover:bg-rose-100 border border-rose-200 px-3 py-1.5 rounded-xl transition-all shadow-2xs cursor-pointer active:scale-95 whitespace-nowrap shrink-0" title="Cerrar sesión">
+              <span>Cerrar sesión</span>
+            </button>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Pestañas Móviles Inferiores Acopladas (Estilo App Nativa Android / Apple iOS) -->
+    <nav id="mobile-user-tabs" style="display: none;" class="hidden md:hidden mobile-bottom-bar px-4 py-1.5 flex items-center justify-around text-xs shadow-lg">
+      <button id="mobile-tab-btn-events" onclick="navigateTo('dashboard-events')" class="font-bold text-[#d87a86] py-1 px-3 transition-transform active:scale-95 text-center">
+        <span class="text-xs">Eventos</span>
+      </button>
+      <button id="mobile-tab-btn-wizard" onclick="navigateTo('dashboard-wizard')" class="font-medium text-gray-500 py-1 px-3 transition-transform active:scale-95 text-center">
+        <span class="text-xs">Solicitud</span>
+      </button>
+      <button id="mobile-tab-btn-admin" style="display: none;" onclick="navigateTo('admin')" class="hidden font-medium text-gray-500 py-1 px-3 transition-transform active:scale-95 text-center">
+        <span class="text-xs">Resultados</span>
+      </button>
+      <button id="mobile-tab-btn-logistics" style="display: none;" onclick="navigateTo('logistics')" class="hidden font-medium text-gray-500 py-1 px-3 transition-transform active:scale-95 text-center">
+        <span class="text-xs">Logística</span>
+      </button>
+      <button id="mobile-tab-btn-labeling" style="display: none;" onclick="navigateTo('labeling')" class="hidden font-medium text-gray-500 py-1 px-3 transition-transform active:scale-95 text-center">
+        <span class="text-xs">Etiquetado</span>
+      </button>
+    </nav>
+  </header>
+
+  <!-- CONTENEDOR PRINCIPAL DE VISTAS (SPA) -->
+  <main class="flex-grow pb-20 md:pb-8">
+
+    <!-- ============================================================== -->
+    <!-- SECCIÓN 1: LANDING PAGE & AUTENTICACIÓN (SPLIT SCREEN)         -->
+    <!-- ============================================================== -->
+    <section id="view-landing" class="min-h-[calc(100vh-5rem)] flex items-stretch">
+      <div class="w-full grid grid-cols-1 lg:grid-cols-12 min-h-full">
+        
+        <!-- Costado Izquierdo: Branding, Carrusel y Misión/Visión -->
+        <div class="lg:col-span-7 bg-[#0f3042] text-white p-6 sm:p-12 lg:p-16 flex flex-col justify-between relative overflow-hidden">
+          
+          <!-- Elementos decorativos de fondo con tonos de bienestar -->
+          <div class="absolute -top-24 -left-24 w-96 h-96 bg-[#d87a86]/20 rounded-full blur-3xl pointer-events-none"></div>
+          <div class="absolute -bottom-24 -right-24 w-96 h-96 bg-[#5fa8bc]/20 rounded-full blur-3xl pointer-events-none"></div>
+
+          <!-- Header interno con insignia -->
+          <div class="relative z-10">
+            <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/15 text-xs text-[#faebee] font-medium mb-6">
+              <span class="w-2 h-2 rounded-full bg-[#d87a86] animate-pulse"></span>
+              Portal Oficial de Alianzas y Patrocinios
+            </div>
+            
+            <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-white leading-tight">
+              Bienestar que acompaña <br class="hidden sm:block">
+              <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#d87a86] via-[#faebee] to-[#e5b850]">cada paso de la mujer</span>
+            </h1>
+            <p class="mt-4 text-base sm:text-lg text-gray-300 max-w-xl font-light leading-relaxed">
+              En INTYLACT integramos el cuidado íntimo con el deporte, el autocuidado y experiencias memorables que inspiran a una comunidad empoderada en toda Venezuela.
+            </p>
+          </div>
+
+          <!-- Carrusel de Misión, Visión y Activaciones Adaptable a Celulares y Computadores -->
+          <div class="relative z-10 my-8">
+            <div class="wellness-card bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl overflow-hidden p-2 shadow-2xl">
+              <div class="carousel-container-adaptive">
+                <img id="carousel-image" src="MISION Y VISION.jpeg" alt="Misión y Visión INTYLACT" class="carousel-img-adaptive">
+                <div class="absolute inset-0 bg-gradient-to-t from-[#0f3042]/90 via-[#0f3042]/30 to-transparent flex flex-col justify-end p-6">
+                  <span id="carousel-badge" class="inline-block px-3 py-1 rounded-md bg-[#d87a86] text-white text-xs font-bold w-fit mb-2">
+                    Propósito y Esencia
+                  </span>
+                  <h3 id="carousel-title" class="text-xl font-bold text-white leading-tight">Nuestra Misión y Visión</h3>
+                  <p id="carousel-subtitle" class="text-xs sm:text-sm text-gray-200 mt-1 line-clamp-2">
+                    Brindar bienestar, salud y conexión íntima a las mujeres con productos formulados con amor, ciencia y conciencia.
+                  </p>
+                </div>
+              </div>
+
+              <!-- Controles del carrusel -->
+              <div class="flex items-center justify-between px-3 pt-3 pb-1">
+                <div id="carousel-indicators" class="flex items-center gap-1.5">
+                  <!-- Generado por JS -->
+                </div>
+                <div class="flex items-center gap-2">
+                  <button onclick="prevCarouselSlide()" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors">
+                    <i class="fa-solid fa-chevron-left text-xs"></i>
+                  </button>
+                  <button onclick="nextCarouselSlide()" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors">
+                    <i class="fa-solid fa-chevron-right text-xs"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Footer con valores de marca -->
+          <div class="relative z-10 flex flex-wrap items-center gap-6 pt-4 border-t border-white/10 text-xs text-gray-400">
+            <span class="flex items-center gap-1.5"><i class="fa-solid fa-heart text-[#d87a86]"></i> Amor y Conciencia</span>
+            <span class="flex items-center gap-1.5"><i class="fa-solid fa-shield-check text-[#5fa8bc]"></i> Ginecología y Ciencia</span>
+            <span class="flex items-center gap-1.5"><i class="fa-solid fa-medal text-[#e5b850]"></i> Marca #1 en Venezuela</span>
+          </div>
+
+        </div>
+
+        <!-- Costado Derecho: Panel Centralizado de Acceso -->
+        <div class="lg:col-span-5 bg-white flex flex-col justify-center items-center p-8 sm:p-12 lg:p-14 border-l border-[#ede6de]">
+          <div class="w-full max-w-md space-y-8">
+            
+            <!-- Banner Logo Oficial sin fondo rectangular -->
+            <div class="text-center">
+              <img src="LOGO_BANNER_PRINT.png" alt="INTYLACT - La marca #1 de cuidado íntimo en Venezuela" class="h-14 sm:h-16 mx-auto object-contain mb-4">
+              <h2 class="text-2xl font-bold text-[#0f3042]">Portal de Gestión de Eventos</h2>
+              <p class="text-sm text-gray-500 mt-1">
+                Inicia sesión para postular tu actividad deportiva, masterclass o evento de bienestar.
+              </p>
+            </div>
+
+            <!-- Caja de Login con Google OAuth -->
+            <div class="wellness-card p-6 bg-[#faf7f2] border border-[#ede6de] shadow-xs">
+              <div class="space-y-4">
+                
+                <!-- Botón Google OAuth Principal -->
+                <button type="button" onclick="openGoogleLoginModal()" class="btn-google group">
+                  <svg class="w-5 h-5" viewBox="0 0 24 24">
+                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                  </svg>
+                  <span class="text-sm font-bold text-gray-700 group-hover:text-gray-900">Iniciar sesión con Google</span>
+                </button>
+
+                <!-- Aviso de Privacidad Requerido por Especificación -->
+                <div class="p-3.5 rounded-xl bg-white border border-[#ede6de] text-[12px] text-gray-600 leading-relaxed flex items-start gap-2.5 shadow-xs">
+                  <i class="fa-solid fa-circle-info text-[#d87a86] mt-0.5 text-xs flex-shrink-0"></i>
+                  <p>
+                    <em>"Al iniciar sesión, tu nombre, correo y foto asociados a tu cuenta de Google se registrarán automáticamente para agilizar tu solicitud."</em>
+                  </p>
+                </div>
+
+              </div>
+            </div>
+
+            <!-- Divisor -->
+            <div class="relative flex items-center justify-center">
+              <div class="border-t border-[#ede6de] w-full"></div>
+              <span class="bg-white px-3 text-xs text-gray-400 uppercase tracking-widest font-semibold">O</span>
+              <div class="border-t border-[#ede6de] w-full"></div>
+            </div>
+
+            <!-- Acceso Secundario Administrador -->
+            <div class="text-center space-y-3">
+              <button type="button" onclick="openAdminLoginModal()" class="w-full py-3 px-4 rounded-xl border border-[#ede6de] bg-white hover:bg-gray-50 text-xs font-bold text-[#0f3042] transition-colors flex items-center justify-center shadow-xs">
+                <span>Inicio de sesión de Administrador</span>
+              </button>
+              <p class="text-[11px] text-gray-400">
+                Uso exclusivo para la Dirección de Mercadeo y Relaciones Públicas de INTYLACT.
+              </p>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ============================================================== -->
+    <!-- SECCIÓN 2 & 3: CONTENEDOR DASHBOARD DEL USUARIO                -->
+    <!-- ============================================================== -->
+    <div id="view-dashboard" class="hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+      <!-- SUB-VISTA 1: INICIO - EVENTOS (SHOWCASE & GALERÍA) -->
+      <div id="subview-events" class="space-y-8 animate-fade-in">
+        
+
+        <!-- Banner de Bienvenida -->
+        <div class="wellness-card bg-gradient-to-r from-white via-[#faebee]/40 to-white p-6 sm:p-8 border border-[#ede6de] flex flex-col md:flex-row items-center justify-between gap-6 shadow-xs">
+          <div class="space-y-2 text-center md:text-left">
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[#faebee] text-[#ba5763]">
+              <i class="fa-solid fa-sparkles text-[10px]"></i> Comunidad Activa INTYLACT
+            </span>
+            <h2 id="dash-welcome-user" class="text-2xl sm:text-3xl font-extrabold text-[#0f3042]">
+              ¡Hola! Te damos la bienvenida ✨
+            </h2>
+            <p class="text-sm text-gray-600 max-w-2xl leading-relaxed">
+              Explora nuestras activaciones más emblemáticas: desde torneos deportivos con el <strong>Intysquad</strong>, hasta stands interactivos y dinámicas de autocuidado en eventos de primer nivel.
+            </p>
+          </div>
+
+          <button id="dash-top-cta-btn" onclick="navigateTo('dashboard-wizard')" class="btn-primary flex-shrink-0 whitespace-nowrap shadow-md">
+            <i id="dash-top-cta-icon" class="fa-solid fa-plus-circle"></i>
+            <span id="dash-top-cta-text">Solicitar Alianza para Evento</span>
+          </button>
+        </div>
+
+        <!-- Video Destacado Corporativo (VIDEO CLX.mp4) Adaptable -->
+        <div class="wellness-card p-4 sm:p-6 bg-white border border-[#ede6de]">
+          <div class="flex items-center justify-between mb-4">
+            <div>
+              <span class="text-xs font-bold uppercase tracking-wider text-[#d87a86]">Video Oficial de Experiencia</span>
+              <h3 class="text-lg font-bold text-[#0f3042]">Activación Intylact en el Torneo CLX</h3>
+            </div>
+            <span class="text-xs text-gray-400 flex items-center gap-1.5">
+              <i class="fa-solid fa-video text-[#d87a86]"></i> Alta Definición
+            </span>
+          </div>
+
+          <div class="video-wrap-adaptive">
+            <video controls playsinline webkit-playsinline preload="metadata" class="w-full h-full object-contain rounded-xl">
+              <source src="VIDEO CLX.mp4" type="video/mp4">
+              Tu navegador no soporta reproducción de video.
+            </video>
+          </div>
+        </div>
+
+        <!-- Galería Fotográfica de Activaciones Adaptable a Celulares, Tablets y Computadores -->
+        <div class="space-y-4">
+          <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-2 border-b border-[#ede6de] pb-3">
+            <div>
+              <span class="text-xs font-bold uppercase tracking-wider text-[#d87a86]">Galería Visual</span>
+              <h3 class="text-xl font-bold text-[#0f3042]">Formatos y Presencia de Marca INTYLACT</h3>
+            </div>
+            <p class="text-xs text-gray-500">
+              Haz clic en cualquier imagen para ampliar y ver los detalles del montaje.
+            </p>
+          </div>
+
+          <div class="gallery-grid-adaptive">
+            
+            <!-- Foto 1: Equipo Campeón -->
+            <div class="gallery-img-wrap aspect-[4/5] bg-gray-100" onclick="openLightbox('EQUIPO CAMPEON INTYSQUAD.jpeg', 'Equipo Campeón Intysquad', 'Celebración y premiación oficial con presencia de marca e indumentaria personalizada.')">
+              <img src="EQUIPO CAMPEON INTYSQUAD.jpeg" alt="Equipo Campeón Intysquad" class="gallery-card-img" loading="lazy">
+              <div class="gallery-img-overlay">
+                <span class="text-white text-xs font-bold">Equipo Campeón Intysquad</span>
+              </div>
+            </div>
+
+            <!-- Foto 2: Intysquad en Cancha -->
+            <div class="gallery-img-wrap aspect-[4/5] bg-gray-100" onclick="openLightbox('INTYSQUAD.jpeg', 'Comunidad Intysquad 2026', 'Torneo de fútbol femenino fomentando hábitos saludables y unión entre atletas.')">
+              <img src="INTYSQUAD.jpeg" alt="Intysquad 2026" class="gallery-card-img" loading="lazy">
+              <div class="gallery-img-overlay">
+                <span class="text-white text-xs font-bold">Comunidad Intysquad 2026</span>
+              </div>
+            </div>
+
+            <!-- Foto 3: Trofeo Oficial -->
+            <div class="gallery-img-wrap aspect-[4/5] bg-gray-100" onclick="openLightbox('TROFEO INTYSQUAD.jpeg', 'Trofeo Oficial Intysquad', 'Copa personalizada con la flor emblemática de INTYLACT para la premiación deportiva.')">
+              <img src="TROFEO INTYSQUAD.jpeg" alt="Trofeo Intysquad" class="gallery-card-img" loading="lazy">
+              <div class="gallery-img-overlay">
+                <span class="text-white text-xs font-bold">Trofeo Oficial</span>
+              </div>
+            </div>
+
+            <!-- Foto 4: Vista General de Inicio -->
+            <div class="gallery-img-wrap aspect-[4/5] bg-gray-100" onclick="openLightbox('INICIO INTYSQUAD.jpeg', 'Inicio de Jornada Intysquad', 'Panorámica de cancha, branding perimetral y afición femenina.')">
+              <img src="INICIO INTYSQUAD.jpeg" alt="Inicio Intysquad" class="gallery-card-img" loading="lazy">
+              <div class="gallery-img-overlay">
+                <span class="text-white text-xs font-bold">Apertura del Torneo</span>
+              </div>
+            </div>
+
+            <!-- Foto 5: Stand con Backing -->
+            <div class="gallery-img-wrap aspect-[4/5] bg-gray-100" onclick="openLightbox('STAND CON BACKING.jpeg', 'Stand & Backing Besties de INTYLACT', 'Módulo de orientación ginecológica y exhibición del Gel Hidratante Íntimo con Ácido Hialurónico.')">
+              <img src="STAND CON BACKING.jpeg" alt="Stand con Backing" class="gallery-card-img" loading="lazy">
+              <div class="gallery-img-overlay">
+                <span class="text-white text-xs font-bold">Stand Besties & Módulo</span>
+              </div>
+            </div>
+
+            <!-- Foto 6: Montaje Inflable en Cancha -->
+            <div class="gallery-img-wrap aspect-[4/5] bg-gray-100" onclick="openLightbox('MONTAJE INTYSQUAD.jpeg', 'Montaje de Domos e Inflables Gigantes', 'Arcos inflables de entrada, tótem IntyProb e inflable de Gel Íntimo en campo de juego.')">
+              <img src="MONTAJE INTYSQUAD.jpeg" alt="Montaje Intysquad" class="gallery-card-img" loading="lazy">
+              <div class="gallery-img-overlay">
+                <span class="text-white text-xs font-bold">Montaje de Alto Impacto</span>
+              </div>
+            </div>
+
+            <!-- Foto 7: Promotoras y Ruleta de Premios -->
+            <div class="gallery-img-wrap aspect-[4/5] bg-gray-100" onclick="openLightbox('PROMOTORA.jpeg', 'Promotoras y Dinámica de Ruleta', 'Equipo de atención al público entregando muestras gratuitas, abanicos y premios al instante.')">
+              <img src="PROMOTORA.jpeg" alt="Promotoras" class="gallery-card-img" loading="lazy">
+              <div class="gallery-img-overlay">
+                <span class="text-white text-xs font-bold">Promotoras & Dinámicas</span>
+              </div>
+            </div>
+
+            <!-- Foto 8: Stand Backing e Inflables -->
+            <div class="gallery-img-wrap aspect-[4/5] bg-gray-100" onclick="openLightbox('STAND-BACKING-INFLABLES.jpeg', 'Stand con Backing e Inflables', 'Conjunto integral de presencia de marca para activaciones tanto en interiores como exteriores.')">
+              <img src="STAND-BACKING-INFLABLES.jpeg" alt="Stand Backing e Inflables" class="gallery-card-img" loading="lazy">
+              <div class="gallery-img-overlay">
+                <span class="text-white text-xs font-bold">Ecosistema de Marca</span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Banner Inferior de Llamada a la Acción (Para Usuarios) -->
+        <div id="dash-bottom-user-cta" class="rounded-2xl bg-[#0f3042] text-white p-8 sm:p-10 flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden">
+          <div class="relative z-10 space-y-2 text-center md:text-left">
+            <h3 class="text-xl sm:text-2xl font-bold">¿Tienes un evento en mente?</h3>
+            <p class="text-sm text-gray-300 max-w-xl">
+              Completa el formulario oficial paso a paso. Nuestro equipo revisará los detalles logísticos, el aforo y la afinidad con los valores de INTYLACT.
+            </p>
+          </div>
+          <button onclick="navigateTo('dashboard-wizard')" class="btn-primary relative z-10 whitespace-nowrap shadow-lg">
+            <span>Iniciar Solicitud de Evento</span>
+          </button>
+        </div>
+
+        <!-- Banner Inferior Alternativo (Para Administrador) -->
+        <div id="dash-bottom-admin-cta" class="hidden rounded-2xl bg-[#0f3042] text-white p-8 sm:p-10 flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden">
+          <div class="relative z-10 space-y-2 text-center md:text-left">
+            <span class="inline-block px-3 py-1 rounded-full bg-white/10 text-xs font-bold text-[#e5b850] uppercase tracking-wider mb-1">
+              Sesión Administrativa
+            </span>
+            <h3 class="text-xl sm:text-2xl font-bold">Gestión de Solicitudes y Leads</h3>
+            <p class="text-sm text-gray-300 max-w-xl">
+              Accede a la cuarta sección para revisar las postulaciones de eventos, consultar los datos del organizador, gestionar estados y exportar los resultados a Excel.
+            </p>
+          </div>
+          <button onclick="navigateTo('admin')" class="btn-primary relative z-10 whitespace-nowrap shadow-lg">
+            <span>Ver Resultados del Formulario y Leads</span>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- SUB-VISTA 2: WIZARD DE SOLICITUD DE EVENTOS (PASO A PASO) -->
+      <div id="subview-wizard" class="hidden max-w-4xl mx-auto space-y-8 animate-fade-in">
+        
+        <!-- Header del Formulario -->
+        <div class="text-center space-y-2">
+          <span class="inline-block px-3 py-1 rounded-full bg-[#faebee] text-[#ba5763] text-xs font-bold uppercase tracking-wider">
+            Registro Oficial de Eventos
+          </span>
+          <h2 class="text-2xl sm:text-3xl font-extrabold text-[#0f3042]">
+            Formulario de Alianza y Participación
+          </h2>
+          <p class="text-xs sm:text-sm text-gray-500 max-w-xl mx-auto">
+            Por favor, completa con precisión cada sección. Todos los campos marcados con asterisco (<span class="text-[#d87a86]">*</span>) son obligatorios.
+          </p>
+        </div>
+
+        <!-- Contenedor del Stepper y Progreso -->
+        <div id="wizard-container" class="wellness-card p-4 sm:p-6 bg-white border border-[#ede6de] shadow-xs">
+          
+          <!-- Indicador Dinámico para Pantallas Móviles -->
+          <div class="sm:hidden flex items-center justify-between text-xs font-semibold pb-3 mb-3 border-b border-gray-100">
+            <span class="text-gray-500">
+              Paso <span id="mobile-step-num" class="text-[#d87a86] font-bold text-sm">1</span> de 6
+            </span>
+            <span id="mobile-step-name" class="text-[#0f3042] font-bold bg-[#faebee] px-2.5 py-1 rounded-full text-[11px]">
+              Políticas de Solicitud
+            </span>
+          </div>
+
+          <!-- Barra de Progreso Superior -->
+          <div class="w-full bg-gray-100 h-2 rounded-full mb-6 overflow-hidden">
+            <div id="wizard-progress-bar" class="h-full bg-gradient-to-r from-[#d87a86] to-[#ba5763] transition-all duration-300" style="width: 0%;"></div>
+          </div>
+
+          <!-- Indicadores de los 6 Pasos (Responsive) -->
+          <div class="grid grid-cols-6 gap-1 sm:gap-2 text-center pb-6 border-b border-[#ede6de]">
+            
+            <div class="flex flex-col items-center">
+              <div id="stepper-num-1" class="stepper-circle active">1</div>
+              <span id="stepper-text-1" class="text-[10px] sm:text-xs font-bold text-[#d87a86] mt-1.5 hidden sm:block">Políticas</span>
+            </div>
+
+            <div class="flex flex-col items-center">
+              <div id="stepper-num-2" class="stepper-circle inactive">2</div>
+              <span id="stepper-text-2" class="text-[10px] sm:text-xs font-semibold text-gray-400 mt-1.5 hidden sm:block">Confidencialidad</span>
+            </div>
+
+            <div class="flex flex-col items-center">
+              <div id="stepper-num-3" class="stepper-circle inactive">3</div>
+              <span id="stepper-text-3" class="text-[10px] sm:text-xs font-semibold text-gray-400 mt-1.5 hidden sm:block">Organizador</span>
+            </div>
+
+            <div class="flex flex-col items-center">
+              <div id="stepper-num-4" class="stepper-circle inactive">4</div>
+              <span id="stepper-text-4" class="text-[10px] sm:text-xs font-semibold text-gray-400 mt-1.5 hidden sm:block">Detalles</span>
+            </div>
+
+            <div class="flex flex-col items-center">
+              <div id="stepper-num-5" class="stepper-circle inactive">5</div>
+              <span id="stepper-text-5" class="text-[10px] sm:text-xs font-semibold text-gray-400 mt-1.5 hidden sm:block">Alcance</span>
+            </div>
+
+            <div class="flex flex-col items-center">
+              <div id="stepper-num-6" class="stepper-circle inactive">6</div>
+              <span id="stepper-text-6" class="text-[10px] sm:text-xs font-semibold text-gray-400 mt-1.5 hidden sm:block">Compromisos</span>
+            </div>
+
+          </div>
+
+          <!-- CONTENIDO DE LOS PASOS DEL WIZARD -->
+          <div class="pt-6">
+            
+            <!-- ============================================== -->
+            <!-- PASO 1: POLÍTICAS DE SOLICITUD                 -->
+            <!-- ============================================== -->
+            <div id="wizard-step-1" class="space-y-6">
+              <div class="p-4 sm:p-6 bg-[#faf7f2] border border-[#ede6de] rounded-2xl space-y-4">
+                <div class="flex items-center gap-3 text-[#d87a86]">
+                  <i class="fa-solid fa-scroll text-2xl"></i>
+                  <h3 class="text-lg font-bold text-[#0f3042]">Políticas de Evaluación y Postulación</h3>
+                </div>
+
+                <p class="text-sm text-gray-700 leading-relaxed">
+                  "Agradecemos tu interés en integrar a <strong>INTYLACT</strong> en tu evento. Nos entusiasma participar en espacios que promuevan el bienestar, sin embargo, nuestra operatividad se rige por una planificación rigurosa."
+                </p>
+
+                <div class="space-y-3 pt-2">
+                  <div class="flex items-start gap-3 p-3 bg-white rounded-xl border border-gray-100">
+                    <span class="w-6 h-6 rounded-full bg-[#faebee] text-[#d87a86] flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">1</span>
+                    <div>
+                      <strong class="text-xs sm:text-sm text-[#0f3042] block">Tiempo Mínimo de Evaluación (10 Días Hábiles)</strong>
+                      <p class="text-xs text-gray-500">
+                        Toda solicitud debe ser radicada con un margen mínimo de 10 días hábiles previos para permitir el análisis logístico, técnico y de inventario por parte de nuestro comité.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div class="flex items-start gap-3 p-3 bg-white rounded-xl border border-gray-100">
+                    <span class="w-6 h-6 rounded-full bg-[#faebee] text-[#d87a86] flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">2</span>
+                    <div>
+                      <strong class="text-xs sm:text-sm text-[#0f3042] block">Protocolo de Comunicación Oficial</strong>
+                      <p class="text-xs text-gray-500">
+                        Las respuestas se emiten formalmente por correo y WhatsApp. Cualquier intento de insistencia previa o contacto extraoficial causará el descarte automático e irrevocable de la postulación.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div class="flex items-start gap-3 p-3 bg-white rounded-xl border border-gray-100">
+                    <span class="w-6 h-6 rounded-full bg-[#faebee] text-[#d87a86] flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">3</span>
+                    <div>
+                      <strong class="text-xs sm:text-sm text-[#0f3042] block">Planificación Logística Estricta</strong>
+                      <p class="text-xs text-gray-500">
+                        No se procesan solicitudes de último minuto. Nos tomamos con la más alta rigurosidad la puesta en escena, la inocuidad y la entrega de productos de higiene íntima.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="pt-4 border-t border-[#ede6de]">
+                  <label class="flex items-start gap-3 cursor-pointer select-none">
+                    <input type="checkbox" id="step1-accept-policies" onchange="onStep1CheckboxChange()" class="custom-checkbox mt-0.5">
+                    <span class="text-xs sm:text-sm font-semibold text-[#0f3042]">
+                      He leído y acepto en su totalidad las políticas de solicitud y los plazos de evaluación de INTYLACT. <span class="req text-[#d87a86]">*</span>
+                    </span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="flex justify-end pt-2">
+                <button id="step1-btn-next" onclick="handleStep1Next()" disabled class="btn-primary">
+                  <span>Continuar al Paso 2</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- ============================================== -->
+            <!-- PASO 2: CONFIDENCIALIDAD                       -->
+            <!-- ============================================== -->
+            <div id="wizard-step-2" class="hidden space-y-6">
+              <div class="p-4 sm:p-6 bg-[#faf7f2] border border-[#ede6de] rounded-2xl space-y-4">
+                <div class="flex items-center gap-3 text-[#d87a86]">
+                  <i class="fa-solid fa-shield-halved text-2xl"></i>
+                  <h3 class="text-lg font-bold text-[#0f3042]">Acuerdo de Confidencialidad y Propiedad Intelectual</h3>
+                </div>
+
+                <div class="p-4 bg-white rounded-xl border border-gray-200 text-xs text-gray-700 leading-relaxed space-y-2 max-h-60 overflow-y-auto">
+                  <p>
+                    La información intercambiada a través de este portal, así como las propuestas comerciales, artes gráficos, diseños de stand, activos digitales, muestras de producto e información técnica de formulaciones, constituyen <strong>información estrictamente confidencial</strong> y propiedad exclusiva de <strong>INTYLACT®</strong>.
+                  </p>
+                  <p>
+                    El solicitante se compromete a:
+                  </p>
+                  <ul class="list-disc pl-5 space-y-1">
+                    <li>No divulgar, compartir ni ceder a terceros ninguna propuesta, cotización o esquema de patrocinio sin consentimiento expreso por escrito.</li>
+                    <li>No utilizar el logotipo, imagotipo, lemas o marcas registradas de INTYLACT® sin la previa aprobación formal del departamento de Marketing.</li>
+                    <li>Garantizar que todo el material de marca entregado para la activación sea devuelto íntegro al finalizar el evento.</li>
+                  </ul>
+                  <p class="font-medium text-[#0f3042]">
+                    El incumplimiento de este acuerdo faculta a la empresa a tomar las acciones legales pertinentes de conformidad con las leyes de la República Bolivariana de Venezuela.
+                  </p>
+                </div>
+
+                <div class="pt-4 border-t border-[#ede6de]">
+                  <label class="flex items-start gap-3 cursor-pointer select-none">
+                    <input type="checkbox" id="step2-accept-confidentiality" onchange="onStep2CheckboxChange()" class="custom-checkbox mt-0.5">
+                    <span class="text-xs sm:text-sm font-semibold text-[#0f3042]">
+                      Acepto el acuerdo de confidencialidad, exclusividad y salvaguarda de propiedad intelectual de INTYLACT. <span class="req text-[#d87a86]">*</span>
+                    </span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="flex items-center justify-between pt-2">
+                <button type="button" onclick="goToWizardStep(1)" class="btn-secondary">
+                  <span>Volver</span>
+                </button>
+                <button id="step2-btn-next" onclick="handleStep2Next()" disabled class="btn-primary">
+                  <span>Continuar al Paso 3</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- ============================================== -->
+            <!-- PASO 3: DATOS DEL ORGANIZADOR                  -->
+            <!-- ============================================== -->
+            <div id="wizard-step-3" class="hidden space-y-6">
+              
+              <div class="p-4 bg-[#faebee]/60 border border-[#faebee] rounded-2xl flex items-start gap-3">
+                <i class="fa-solid fa-sparkles text-[#d87a86] text-lg mt-0.5"></i>
+                <p class="text-xs sm:text-sm text-[#0f3042] leading-relaxed">
+                  "Cuéntanos quién está detrás de esta iniciativa. Queremos saber con quién haremos equipo. ✨ Por favor, asegúrate de proporcionar datos de contacto vigentes (WhatsApp y correo) para que nuestro equipo de Marketing pueda enviarte la resolución de la evaluación."
+                </p>
+              </div>
+
+              <div class="space-y-4">
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label class="form-label">
+                      Nombre y Apellido del Responsable o Empresa <span class="req">*</span>
+                    </label>
+                    <input type="text" id="form-org-name" list="datalist-names" autocomplete="name" oninput="validateCurrentStep()" placeholder="Ej. Valeria Morales Rivas / SportFit Venezuela C.A." class="form-input">
+                  </div>
+                  <div>
+                    <label class="form-label">
+                      Cédula / Identificación del Responsable <span class="req">*</span>
+                    </label>
+                    <input type="text" id="form-org-id-document" list="datalist-cedulas" autocomplete="off" oninput="validateCurrentStep()" placeholder="Ej. V- 12345678" class="form-input font-mono font-semibold">
+                  </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label class="form-label">
+                      Correo Electrónico de Contacto <span class="req">*</span>
+                    </label>
+                    <input type="email" id="form-org-email" list="datalist-google-emails" inputmode="email" autocomplete="email" oninput="validateCurrentStep()" placeholder="ejemplo@correo.com" class="form-input">
+                  </div>
+                  <div>
+                    <label class="form-label">
+                      Número Contacto de WhatsApp <span class="req">*</span>
+                    </label>
+                    <input type="tel" id="form-org-whatsapp" list="datalist-phones" inputmode="tel" autocomplete="tel" oninput="validateCurrentStep()" placeholder="+58 412 1234567" class="form-input">
+                  </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label class="form-label">
+                      Link de Instagram del Evento <span class="req">*</span>
+                    </label>
+                    <input type="url" id="form-org-insta-link" inputmode="url" oninput="validateCurrentStep()" placeholder="https://instagram.com/nombredelevento" class="form-input">
+                  </div>
+                  <div>
+                    <label class="form-label">
+                      Usuario de Instagram (@) <span class="req">*</span>
+                    </label>
+                    <input type="text" id="form-org-insta-user" list="datalist-instagram" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" oninput="validateCurrentStep()" placeholder="@nombredelevento" class="form-input">
+                  </div>
+                </div>
+
+              </div>
+
+              <div class="flex items-center justify-between pt-2">
+                <button type="button" onclick="goToWizardStep(2)" class="btn-secondary">
+                  <span>Volver</span>
+                </button>
+                <button id="step3-btn-next" onclick="handleStep3Next()" disabled class="btn-primary">
+                  <span>Continuar al Paso 4</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- ============================================== -->
+            <!-- PASO 4: DETALLES GENERALES Y CONDICIONALES     -->
+            <!-- ============================================== -->
+            <div id="wizard-step-4" class="hidden space-y-6">
+              
+              <div class="p-4 bg-[#faebee]/60 border border-[#faebee] rounded-2xl flex items-start gap-3">
+                <i class="fa-solid fa-clock text-[#d87a86] text-lg mt-0.5"></i>
+                <p class="text-xs sm:text-sm text-[#0f3042] leading-relaxed">
+                  "La planificación de nuestra logística depende totalmente de la duración de tu actividad. Por favor, selecciona si se trata de un solo día o de múltiples jornadas para desplegar los requerimientos pertinentes."
+                </p>
+              </div>
+
+              <div class="space-y-5">
+                
+                <div>
+                  <label class="form-label">
+                    Nombre del Evento / Activación <span class="req">*</span>
+                  </label>
+                  <input type="text" id="form-event-name" list="datalist-events" oninput="validateCurrentStep()" placeholder="Ej. Torneo Femenino Intysquad & Bienestar 2026" class="form-input">
+                </div>
+
+                <!-- Selector de Duración: Radio Buttons -->
+                <div>
+                  <label class="form-label mb-2">
+                    ¿El evento dura un día o varios días? <span class="req">*</span>
+                  </label>
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <label class="wellness-card p-3.5 flex items-center gap-3 cursor-pointer border border-[#ede6de] hover:border-[#d87a86]">
+                      <input type="radio" name="event-duration" value="dia_unico" checked onchange="onDurationChange()" class="custom-radio">
+                      <div>
+                        <strong class="text-sm text-[#0f3042] block">Día Único</strong>
+                        <span class="text-xs text-gray-400">Jornada simple en un solo horario</span>
+                      </div>
+                    </label>
+
+                    <label class="wellness-card p-3.5 flex items-center gap-3 cursor-pointer border border-[#ede6de] hover:border-[#d87a86]">
+                      <input type="radio" name="event-duration" value="multijornada" onchange="onDurationChange()" class="custom-radio">
+                      <div>
+                        <strong class="text-sm text-[#0f3042] block">Multijornada</strong>
+                        <span class="text-xs text-gray-400">Varios días sucesivos o cronograma amplio</span>
+                      </div>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- CONDICIONAL 1: DÍA ÚNICO -->
+                <div id="conditional-dia-unico" class="space-y-4 p-4 bg-gray-50 border border-gray-200 rounded-2xl">
+                  
+                  <div class="p-3 bg-white rounded-xl border border-gray-100 text-xs text-gray-600">
+                    <i class="fa-solid fa-info-circle text-[#d87a86] mr-1"></i>
+                    <strong>Nota:</strong> Especifica la fecha exacta y los horarios de inicio y fin (Formato hora de Caracas, Venezuela).
+                  </div>
+
+                  <div>
+                    <label class="form-label">Día y Fecha del Evento <span class="req">*</span></label>
+                    <input type="text" id="form-single-date" oninput="validateCurrentStep()" placeholder="Ej. Sábado 28 de Noviembre de 2026" class="form-input">
+                  </div>
+
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label class="form-label">Hora de Inicio del Evento (Hora Caracas, VE) <span class="req">*</span></label>
+                      <input type="text" id="form-single-start" oninput="validateCurrentStep()" placeholder="Ej. 08:30 AM" class="form-input">
+                    </div>
+                    <div>
+                      <label class="form-label">Hora de Finalización del Evento <span class="req">*</span></label>
+                      <input type="text" id="form-single-end" oninput="validateCurrentStep()" placeholder="Ej. 05:00 PM" class="form-input">
+                    </div>
+                  </div>
+                </div>
+
+                <!-- CONDICIONAL 2: MULTIJORNADA -->
+                <div id="conditional-multijornada" class="hidden space-y-4 p-4 bg-gray-50 border border-gray-200 rounded-2xl">
+                  
+                  <div class="p-3 bg-white rounded-xl border border-gray-100 text-xs text-gray-600">
+                    <i class="fa-solid fa-calendar-days text-[#e5b850] mr-1"></i>
+                    <strong>Detalles Multijornada:</strong> Detalla el rango completo de fechas y especifica los horarios detallados de cada día.
+                  </div>
+
+                  <div>
+                    <label class="form-label">Días y Fechas del Evento (Rango) <span class="req">*</span></label>
+                    <input type="text" id="form-multi-date" oninput="validateCurrentStep()" placeholder="Ej. Del 14 al 16 de Mayo de 2026" class="form-input">
+                  </div>
+
+                  <div>
+                    <label class="form-label">Horarios Detallados (Por Día y Fecha) <span class="req">*</span></label>
+                    <textarea id="form-multi-schedule" oninput="validateCurrentStep()" rows="3" placeholder="Ej. Viernes: 2:00 PM a 7:00 PM | Sábado: 8:00 AM a 6:00 PM | Domingo: 9:00 AM a 3:00 PM" class="form-input"></textarea>
+                  </div>
+                </div>
+
+                <!-- Campos Comunes: Ubicación y Google Maps -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label class="form-label">
+                      Ubicación Exacta (Ciudad, Estado y Local Específico) <span class="req">*</span>
+                    </label>
+                    <input type="text" id="form-location" list="datalist-locations" oninput="validateCurrentStep()" placeholder="Ej. Caracas, Miranda - Canchas La Guairita" class="form-input">
+                  </div>
+                  <div>
+                    <label class="form-label">
+                      Link de Google Maps <span class="text-xs text-gray-400 font-normal">(Opcional)</span>
+                    </label>
+                    <input type="url" id="form-maps-link" inputmode="url" oninput="validateCurrentStep()" placeholder="https://maps.google.com/?q=... (Opcional)" class="form-input">
+                  </div>
+                </div>
+
+                <!-- Subida de Archivos: Flyer y Brochure/Dossier -->
+                <div class="space-y-2 pt-2">
+                  <label class="form-label">
+                    Archivos del Evento: Foto del Flyer y Brochure / Dossier (En caso de aplicar)
+                  </label>
+                  
+                  <div class="dropzone" onclick="document.getElementById('file-upload-input').click()">
+                    <input type="file" id="file-upload-input" multiple accept=".pdf,.png,.jpg,.jpeg,image/*" onchange="handleFilesSelected(event)" class="hidden">
+                    <i class="fa-solid fa-cloud-arrow-up text-3xl text-[#d87a86] mb-2 block"></i>
+                    <p class="text-sm font-semibold text-[#0f3042]">Haz clic aquí o arrastra tus archivos</p>
+                    <p class="text-xs text-gray-400 mt-1">
+                      Acepta PDF, JPG, PNG. Máximo 5 archivos, hasta 100MB por archivo.
+                    </p>
+                    <button type="button" class="mt-3 px-4 py-1.5 bg-white border border-[#ede6de] text-xs font-semibold rounded-lg text-[#0f3042] hover:bg-gray-50 shadow-xs inline-flex items-center">
+                      Añadir archivo
+                    </button>
+                  </div>
+
+                  <!-- Lista de Archivos Adjuntos -->
+                  <div id="uploaded-files-list" class="space-y-2 pt-2">
+                    <!-- Rellenado por JS -->
+                  </div>
+                </div>
+
+              </div>
+
+              <div class="flex items-center justify-between pt-2">
+                <button type="button" onclick="goToWizardStep(3)" class="btn-secondary">
+                  <span>Volver</span>
+                </button>
+                <button id="step4-btn-next" onclick="handleStep4Next()" disabled class="btn-primary">
+                  <span>Continuar al Paso 5</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- ============================================== -->
+            <!-- PASO 5: ALCANCE Y APORTE HACIA LA MARCA        -->
+            <!-- ============================================== -->
+            <div id="wizard-step-5" class="hidden space-y-6">
+              
+              <div class="p-4 bg-[#faebee]/60 border border-[#faebee] rounded-2xl">
+                <h3 class="text-xs font-bold uppercase tracking-wider text-[#d87a86] mb-1">
+                  Alcance y Aporte del Evento hacia la Marca
+                </h3>
+                <p class="text-xs sm:text-sm text-[#0f3042]">
+                  Cuéntanos la magnitud esperada y cómo visualizas la participación de INTYLACT para que evaluemos el retorno y sinergia.
+                </p>
+              </div>
+
+              <div class="space-y-5">
+                
+                <div>
+                  <label class="form-label">
+                    Aforo Estimado / Flujo de Personas Confirmadas <span class="req">*</span>
+                  </label>
+                  <input type="text" id="form-capacity" oninput="validateCurrentStep()" placeholder="Ej. 600 asistentes y 100 atletas mujeres" class="form-input">
+                </div>
+
+                <!-- Checkboxes de Tipo de Aporte -->
+                <div>
+                  <label class="form-label mb-2">
+                    ¿De qué manera te gustaría que INTYLACT forme parte? (Tipo de aporte) <span class="req">*</span>
+                  </label>
+                  
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    
+                    <label class="wellness-card p-3 flex items-center gap-3 cursor-pointer border border-[#ede6de] hover:border-[#d87a86]">
+                      <input type="checkbox" name="contributions" value="LOGO EN FLYER" onchange="validateCurrentStep()" class="custom-checkbox">
+                      <span class="text-xs font-semibold text-[#0f3042]">LOGO EN FLYER</span>
+                    </label>
+
+                    <label class="wellness-card p-3 flex items-center gap-3 cursor-pointer border border-[#ede6de] hover:border-[#d87a86]">
+                      <input type="checkbox" name="contributions" value="MENCIÓN EN REDES SOCIALES DEL EVENTO" onchange="validateCurrentStep()" class="custom-checkbox">
+                      <span class="text-xs font-semibold text-[#0f3042]">MENCIÓN EN REDES SOCIALES DEL EVENTO</span>
+                    </label>
+
+                    <label class="wellness-card p-3 flex items-center gap-3 cursor-pointer border border-[#ede6de] hover:border-[#d87a86]">
+                      <input type="checkbox" name="contributions" value="BASE DE DATOS DE ASISTENTES" onchange="validateCurrentStep()" class="custom-checkbox">
+                      <span class="text-xs font-semibold text-[#0f3042]">BASE DE DATOS DE ASISTENTES</span>
+                    </label>
+
+                    <label class="wellness-card p-3 flex items-center gap-3 cursor-pointer border border-[#ede6de] hover:border-[#d87a86]">
+                      <input type="checkbox" name="contributions" value="ESPACIO PARA CHARLA DE LA MARCA" onchange="validateCurrentStep()" class="custom-checkbox">
+                      <span class="text-xs font-semibold text-[#0f3042]">ESPACIO PARA CHARLA DE LA MARCA</span>
+                    </label>
+
+                    <label class="wellness-card p-3 flex items-center gap-3 cursor-pointer border border-[#ede6de] hover:border-[#d87a86]">
+                      <input type="checkbox" name="contributions" value="LOGO EN MATERIAL IMPRESO DEL EVENTO" onchange="validateCurrentStep()" class="custom-checkbox">
+                      <span class="text-xs font-semibold text-[#0f3042]">LOGO EN MATERIAL IMPRESO DEL EVENTO</span>
+                    </label>
+
+                    <label class="wellness-card p-3 flex items-center gap-3 cursor-pointer border border-[#ede6de] hover:border-[#d87a86]">
+                      <input type="checkbox" name="contributions" value="ESPACIO PARA STAND" onchange="validateCurrentStep()" class="custom-checkbox">
+                      <span class="text-xs font-semibold text-[#0f3042]">ESPACIO PARA STAND</span>
+                    </label>
+
+                    <label class="wellness-card p-3 flex items-center gap-3 cursor-pointer border border-[#ede6de] hover:border-[#d87a86]">
+                      <input type="checkbox" id="contrib-otro" name="contributions" value="Otro" onchange="onContributionCheckboxChange()" class="custom-checkbox">
+                      <span class="text-xs font-semibold text-[#0f3042]">Otro aporte</span>
+                    </label>
+
+                  </div>
+
+                  <!-- Campo Dinámico para "Otro" -->
+                  <div id="container-other-contribution" class="hidden mt-3">
+                    <label class="form-label text-xs">Especifica el otro tipo de aporte propuesto: <span class="req">*</span></label>
+                    <input type="text" id="form-other-contribution" oninput="validateCurrentStep()" placeholder="Detalla cómo visualizas este aporte..." class="form-input">
+                  </div>
+                </div>
+
+                <!-- Retorno / Beneficio -->
+                <div>
+                  <label class="form-label">
+                    ¿Cuál será el beneficio / retorno del evento hacia la marca? <span class="req">*</span>
+                  </label>
+                  <textarea id="form-brand-return" oninput="validateCurrentStep()" rows="4" placeholder="Explica la visibilidad, sampling, colocación de producto, menciones en vivo o resultados concretos que obtendrá INTYLACT..." class="form-input"></textarea>
+                </div>
+
+              </div>
+
+              <div class="flex items-center justify-between pt-2">
+                <button type="button" onclick="goToWizardStep(4)" class="btn-secondary">
+                  <span>Volver</span>
+                </button>
+                <button id="step5-btn-next" onclick="handleStep5Next()" disabled class="btn-primary">
+                  <span>Continuar al Paso 6</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- ============================================== -->
+            <!-- PASO 6: ACEPTACIÓN FINAL Y ENVÍO               -->
+            <!-- ============================================== -->
+            <div id="wizard-step-6" class="hidden space-y-6">
+              
+              <div class="text-center space-y-1">
+                <h3 class="text-lg font-bold text-[#0f3042]">
+                  ACEPTACIÓN DE POLÍTICAS Y COMPROMISOS
+                </h3>
+                <p class="text-xs text-gray-500">
+                  Por favor, confirma tu acuerdo final con cada uno de los siguientes compromisos corporativos.
+                </p>
+              </div>
+
+              <!-- Resumen de los datos cargados -->
+              <div id="step6-summary-box" class="p-4 bg-gray-50 rounded-2xl border border-gray-200">
+                <!-- Rellenado por JS -->
+              </div>
+
+              <!-- Tres Checkboxes Independientes y Obligatorios -->
+              <div class="space-y-3 pt-2">
+                
+                <label class="wellness-card p-4 flex items-start gap-3 cursor-pointer border border-[#ede6de] hover:border-[#d87a86]">
+                  <input type="checkbox" id="step6-check-rrss" onchange="onStep6CheckboxesChange()" class="custom-checkbox mt-0.5">
+                  <span class="text-xs sm:text-sm text-gray-700 leading-relaxed select-none">
+                    <strong>ENTENDIDO Y DE ACUERDO ✨</strong> — Entiendo que la participación y las menciones en redes sociales o relaciones públicas son independientes y quedan a estricto criterio y validación del equipo de mercadeo de INTYLACT. <span class="req text-[#d87a86]">*</span>
+                  </span>
+                </label>
+
+                <label class="wellness-card p-4 flex items-start gap-3 cursor-pointer border border-[#ede6de] hover:border-[#d87a86]">
+                  <input type="checkbox" id="step6-check-10dias" onchange="onStep6CheckboxesChange()" class="custom-checkbox mt-0.5">
+                  <span class="text-xs sm:text-sm text-gray-700 leading-relaxed select-none">
+                    <strong>ENTENDIDO Y DE ACUERDO ✨</strong> — Confirmo que mi solicitud respeta el plazo mínimo de 10 días hábiles requeridos para la evaluación logística y presupuestaria previa. <span class="req text-[#d87a86]">*</span>
+                  </span>
+                </label>
+
+                <label class="wellness-card p-4 flex items-start gap-3 cursor-pointer border border-[#ede6de] hover:border-[#d87a86]">
+                  <input type="checkbox" id="step6-check-confidencialidad" onchange="onStep6CheckboxesChange()" class="custom-checkbox mt-0.5">
+                  <span class="text-xs sm:text-sm text-gray-700 leading-relaxed select-none">
+                    <strong>Acepto los términos de confidencialidad y exclusividad</strong>, y me comprometo a no divulgar propuestas ni hacer uso no autorizado de los activos de INTYLACT. <span class="req text-[#d87a86]">*</span>
+                  </span>
+                </label>
+
+              </div>
+
+              <div class="flex items-center justify-between pt-4 border-t border-[#ede6de]">
+                <button type="button" onclick="goToWizardStep(5)" class="btn-secondary">
+                  <span>Volver</span>
+                </button>
+                <button id="step6-btn-submit" onclick="submitEventProposal()" disabled class="btn-primary px-8">
+                  <span>Enviar evento</span>
+                </button>
+              </div>
+
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+
+      <!-- SUB-VISTA 3: PANTALLA DE ÉXITO FESTIVA CON CONFETTI -->
+      <div id="subview-success" class="hidden max-w-xl mx-auto py-12 text-center space-y-6 animate-fade-in">
+        
+        <div class="w-20 h-20 rounded-full bg-[#faebee] text-[#d87a86] border-4 border-[#f4d3d8] flex items-center justify-center mx-auto text-3xl shadow-lg pulse-badge">
+          <i class="fa-solid fa-check"></i>
+        </div>
+
+        <div class="space-y-3">
+          <span class="inline-block px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold uppercase tracking-wider">
+            Recepción Exitosa
+          </span>
+          <h2 class="text-3xl font-extrabold text-[#0f3042]">¡Propuesta enviada con éxito! ✨</h2>
+          <p class="text-sm text-gray-600 leading-relaxed max-w-md mx-auto">
+            "En <strong>INTYLACT</strong> revisamos cada detalle con amor y rigurosidad. Nuestro equipo evaluará tu solicitud y se pondrá en contacto contigo a través de WhatsApp o correo electrónico."
+          </p>
+        </div>
+
+        <!-- Ticket Card -->
+        <div class="wellness-card p-6 bg-white border border-[#ede6de] text-left space-y-3 shadow-md max-w-md mx-auto">
+          <div class="flex items-center justify-between pb-3 border-b border-[#ede6de]">
+            <span class="text-xs text-gray-400 font-medium">Código de Solicitud:</span>
+            <span id="success-ticket-id" class="font-mono font-bold text-[#d87a86] text-sm">INTY-2026-0000</span>
+          </div>
+          <div class="flex items-center justify-between text-xs">
+            <span class="text-gray-400">Canal de notificación:</span>
+            <span id="success-org-email" class="font-semibold text-[#0f3042]">correo</span>
+          </div>
+          <div class="flex items-center justify-between text-xs">
+            <span class="text-gray-400">Plazo de evaluación:</span>
+            <span class="font-semibold text-emerald-700">Hasta 10 días hábiles</span>
+          </div>
+        </div>
+
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-3 pt-4">
+          <button onclick="navigateTo('dashboard-events')" class="btn-primary w-full sm:w-auto">
+            <span>Volver al Inicio</span>
+          </button>
+          <button onclick="navigateTo('dashboard-wizard')" class="btn-secondary w-full sm:w-auto">
+            <span>Enviar Otra Solicitud</span>
+          </button>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- ============================================================== -->
+    <!-- SECCIÓN 4: PANEL DE ADMINISTRACIÓN (SOLO ADMINS)              -->
+    <!-- ============================================================== -->
+    <section id="view-admin" class="hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 animate-fade-in">
+      
+      <!-- Header del Panel Admin -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-[#ede6de]">
+        <div>
+          <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-[#0f3042] text-white mb-2">
+            Cuarta Sección: Panel de Administración
+          </div>
+          <h2 class="text-2xl sm:text-3xl font-extrabold text-[#0f3042]">Resultados del Formulario, Leads y Exportación</h2>
+          <p class="text-xs sm:text-sm text-gray-500">
+            Control exclusivo para la Dirección de Mercadeo: consulta las postulaciones recibidas, gestiona los leads capturados con Google y exporta los datos a Excel (.xlsx).
+          </p>
+        </div>
+
+          <!-- Acceso a Etiquetado de Cajas -->
+          <button onclick="navigateTo('labeling')" class="px-4 py-2.5 bg-[#0f3042] hover:bg-[#163f53] text-white rounded-xl text-xs font-bold shadow-sm transition-all">
+            <span>Etiquetado de Cajas</span>
+          </button>
+
+          <!-- Botón de Exportar a Excel -->
+          <button onclick="exportRequestsToExcel()" class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-sm transition-all">
+            <span>Exportar a Excel (.xlsx)</span>
+          </button>
+
+          <!-- Conector Webhook / Google Sheets -->
+          <button onclick="openIntegrationSettingsModal()" class="px-4 py-2.5 bg-white border border-[#ede6de] text-[#0f3042] hover:bg-gray-50 rounded-xl text-xs font-bold shadow-sm transition-all">
+            <span>Integrar API / Sheets</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Métricas Resumen (Interactivas para Contabilizar y Filtrar) -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        
+        <div onclick="setAdminEventsFilter('todos')" class="wellness-card p-4 sm:p-5 bg-white border border-[#ede6de] cursor-pointer hover:border-[#0f3042] hover:shadow-md transition-all group" title="Clic para contabilizar y ver todos los eventos solicitados">
+          <div class="flex items-center justify-between">
+            <span class="text-xs text-gray-400 group-hover:text-[#0f3042] font-semibold block uppercase tracking-wider transition-colors">Total Solicitudes</span>
+            <span class="text-[10px] font-bold text-[#d87a86] bg-[#faebee] px-1.5 py-0.5 rounded">Ver Todos</span>
+          </div>
+          <div class="flex items-baseline justify-between mt-2">
+            <span id="metric-total-requests" class="text-2xl sm:text-3xl font-extrabold text-[#0f3042]">0</span>
+            <i class="fa-solid fa-calendar-check text-[#d87a86] text-xl group-hover:scale-110 transition-transform"></i>
+          </div>
+        </div>
+
+        <div class="wellness-card p-4 sm:p-5 bg-white border border-[#ede6de]">
+          <span class="text-xs text-gray-400 font-semibold block uppercase tracking-wider">Pendientes</span>
+          <div class="flex items-baseline justify-between mt-2">
+            <span id="metric-pending-requests" class="text-2xl sm:text-3xl font-extrabold text-[#e5b850]">0</span>
+            <i class="fa-solid fa-hourglass-half text-[#e5b850] text-xl"></i>
+          </div>
+        </div>
+
+        <div onclick="setAdminEventsFilter('Aprobado')" class="wellness-card p-4 sm:p-5 bg-white border border-[#ede6de] cursor-pointer hover:border-emerald-500 hover:shadow-md transition-all group" title="Clic para contabilizar y ver SOLO los eventos aprobados">
+          <div class="flex items-center justify-between">
+            <span class="text-xs text-gray-400 group-hover:text-emerald-700 font-semibold block uppercase tracking-wider transition-colors">Aprobadas</span>
+            <span class="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded">Filtrar Aprobados</span>
+          </div>
+          <div class="flex items-baseline justify-between mt-2">
+            <span id="metric-approved-requests" class="text-2xl sm:text-3xl font-extrabold text-emerald-600">0</span>
+            <i class="fa-solid fa-circle-check text-emerald-500 text-xl group-hover:scale-110 transition-transform"></i>
+          </div>
+        </div>
+
+        <div class="wellness-card p-4 sm:p-5 bg-white border border-[#ede6de]">
+          <span class="text-xs text-gray-400 font-semibold block uppercase tracking-wider">Leads Google</span>
+          <div class="flex items-baseline justify-between mt-2">
+            <span id="metric-total-leads" class="text-2xl sm:text-3xl font-extrabold text-[#5fa8bc]">0</span>
+            <i class="fa-brands fa-google text-[#5fa8bc] text-xl"></i>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- TABLA 1: DATAGRID DE SOLICITUDES DE EVENTOS -->
+      <div class="wellness-card bg-white border border-[#ede6de] rounded-2xl overflow-hidden shadow-xs">
+        
+        <!-- Barra de Contabilización de Eventos y Filtro Directo de Aprobados -->
+        <div class="p-3.5 sm:p-4 bg-[#faf7f2] border-b border-[#ede6de] flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+          <div class="flex items-center gap-2.5">
+            <div class="w-8 h-8 rounded-lg bg-[#faebee] text-[#d87a86] flex items-center justify-center font-bold text-xs flex-shrink-0">
+              <i class="fa-solid fa-calculator"></i>
+            </div>
+            <div>
+              <span class="text-[10px] font-bold uppercase tracking-wider text-gray-400 block">Contabilizador Oficial de Eventos:</span>
+              <div class="text-xs font-black text-[#0f3042] flex items-center gap-2 flex-wrap">
+                <span>Total Solicitados: <strong id="admin-count-total" class="text-[#d87a86] text-sm">0</strong></span>
+                <span class="text-gray-300">•</span>
+                <span>Solo Aprobados: <strong id="admin-count-approved" class="text-emerald-600 text-sm">0</strong></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Botones de Filtro Rápido para Contabilizar -->
+          <div class="flex items-center gap-1.5 self-start sm:self-center">
+            <span class="text-[11px] font-bold text-gray-500 mr-1 hidden md:inline">Contabilizar:</span>
+            <button type="button" id="btn-filter-all" onclick="setAdminEventsFilter('todos')" class="px-3 py-1.5 rounded-xl text-xs font-black transition-all bg-[#0f3042] text-white shadow-xs" title="Mostrar y contabilizar todas las solicitudes de eventos">
+              <span>Todos los Solicitados (<span id="pill-count-all">0</span>)</span>
+            </button>
+            <button type="button" id="btn-filter-approved" onclick="setAdminEventsFilter('Aprobado')" class="px-3 py-1.5 rounded-xl text-xs font-bold transition-all bg-white border border-emerald-300 text-emerald-700 hover:bg-emerald-50" title="Filtrar y contabilizar solo los eventos aprobados">
+              <span>Solo Aprobados (<span id="pill-count-approved">0</span>)</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Barra de Búsqueda y Filtros de la Tabla -->
+        <div class="p-4 sm:p-5 border-b border-[#ede6de] flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 bg-white">
+          
+          <div class="relative flex-1 max-w-md">
+            <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
+            <input type="text" id="admin-search-input" oninput="filterAdminRequests()" placeholder="Buscar por código, evento, organizador o correo..." class="form-input pl-9 text-xs">
+          </div>
+
+          <div class="flex flex-wrap items-center gap-2">
+            <select id="admin-filter-status" onchange="filterAdminRequests()" class="form-input text-xs py-2 px-3 w-auto font-medium">
+              <option value="todos">Todos los Estados</option>
+              <option value="Pendiente">⏳ Pendiente</option>
+              <option value="En Revisión">🔍 En Revisión</option>
+              <option value="Aprobado">✅ Aprobado</option>
+              <option value="Rechazado">❌ Rechazado</option>
+            </select>
+
+            <select id="admin-filter-duration" onchange="filterAdminRequests()" class="form-input text-xs py-2 px-3 w-auto font-medium">
+              <option value="todos">Todas las Modalidades</option>
+              <option value="dia_unico">Día Único</option>
+              <option value="multijornada">Multijornada</option>
+            </select>
+          </div>
+
+        </div>
+
+        <!-- DataGrid Table -->
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="bg-[#faf7f2] border-b border-[#ede6de] text-[11px] font-bold text-gray-500 uppercase tracking-wider">
+                <th class="py-3 px-4">Código</th>
+                <th class="py-3 px-4">Evento / Modalidad</th>
+                <th class="py-3 px-4">Organizador</th>
+                <th class="py-3 px-4">Fecha Registro</th>
+                <th class="py-3 px-4">Aforo Estimado</th>
+                <th class="py-3 px-4">Estado</th>
+                <th class="py-3 px-4 text-right">Acción</th>
+              </tr>
+            </thead>
+            <tbody id="admin-requests-tbody" class="divide-y divide-[#ede6de] text-xs">
+              <!-- Rellenado por JS -->
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+
+      <!-- TABLA 2: DIRECTORIO DE LEADS Y USUARIOS GOOGLE OAUTH -->
+      <div class="wellness-card bg-white border border-[#ede6de] rounded-2xl overflow-hidden shadow-xs">
+        
+        <div class="p-4 sm:p-5 border-b border-[#ede6de] flex items-center justify-between">
+          <div>
+            <span class="text-xs font-bold uppercase tracking-wider text-[#5fa8bc]">Base de Datos de Usuarios</span>
+            <h3 class="text-lg font-bold text-[#0f3042]">Directorio de Leads Capturados con Google OAuth</h3>
+          </div>
+          <span class="text-xs text-gray-400">Sincronizado automáticamente</span>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="bg-[#faf7f2] border-b border-[#ede6de] text-[11px] font-bold text-gray-500 uppercase tracking-wider">
+                <th class="py-3 px-4">Usuario Google</th>
+                <th class="py-3 px-4">Correo Electrónico</th>
+                <th class="py-3 px-4">Teléfono WhatsApp</th>
+                <th class="py-3 px-4">Fecha de Registro</th>
+                <th class="py-3 px-4 text-center">Eventos Postulados</th>
+              </tr>
+            </thead>
+            <tbody id="admin-leads-tbody" class="divide-y divide-[#ede6de] text-xs">
+              <!-- Rellenado por JS -->
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- ============================================================== -->
+    <!-- NUEVA SECCIÓN: LOGÍSTICA Y ARMADO DE PAQUETES (SOLO ADMINS)   -->
+    <!-- ============================================================== -->
+    <section id="view-logistics" class="hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 animate-fade-in">
+      
+      <!-- Header de la Sección Logística -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-[#ede6de]">
+        <div>
+          <div class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-[#0f3042] text-white mb-2">
+            Gestión y Control de Despacho • INTYLACT
+          </div>
+          <h2 class="text-2xl sm:text-3xl font-extrabold text-[#0f3042]">Logística y Armado de Paquetes</h2>
+          <p class="text-xs sm:text-sm text-gray-500 max-w-3xl">
+            Indica y gestiona los ítems y materiales para armar los paquetes de eventos aprobados en Resultados y Leads, o crea eventos manualmente. Controla el estado del armado (En Proceso, Armado, Entregado) y sincroniza automáticamente con Etiquetado para imprimir los rótulos oficiales de cajas.
+          </p>
+        </div>
+
+        <!-- Botones Principales de Acción en Cabecera -->
+        <div class="flex flex-wrap items-center gap-2 sm:self-end">
+          <button onclick="startNewManualLogisticsPackage()" class="btn-primary text-xs py-2 px-3.5 flex items-center gap-2 shadow-xs cursor-pointer active:scale-95" title="Llenar datos manualmente de otro evento no registrado en el sistema">
+            <i class="fa-solid fa-plus"></i>
+            <span>Crear Evento</span>
+          </button>
+          <button onclick="exportLogisticsToExcel()" class="btn-secondary text-xs py-2 px-3 flex items-center gap-1.5 bg-emerald-50 text-emerald-800 border-emerald-300 hover:bg-emerald-100 shadow-xs cursor-pointer active:scale-95" title="Exportar reporte completo de logística a Excel (.xlsx)">
+            <i class="fa-solid fa-file-excel text-emerald-600"></i>
+            <span>Exportar Excel</span>
+          </button>
+          <button onclick="exportLogisticsToPdf()" class="btn-secondary text-xs py-2 px-3 flex items-center gap-1.5 bg-rose-50 text-rose-800 border-rose-300 hover:bg-rose-100 shadow-xs cursor-pointer active:scale-95" title="Exportar reporte completo de logística a PDF">
+            <i class="fa-solid fa-file-pdf text-rose-600"></i>
+            <span>Exportar PDF</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Tarjetas de Métricas KPI y Filtro Rápido por Status -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        
+        <!-- Total Eventos en Logística -->
+        <div onclick="filterLogisticsByStatus('todos')" class="bg-white p-4 sm:p-5 rounded-2xl border border-[#ede6de] shadow-subtle hover:border-[#d87a86] transition-all cursor-pointer group">
+          <span class="text-xs font-bold text-gray-500 uppercase tracking-wider block">Total Paquetes</span>
+          <div class="mt-2 flex items-baseline gap-2">
+            <span id="logistics-kpi-total" class="text-2xl sm:text-3xl font-extrabold text-[#0f3042]">0</span>
+            <span class="text-[11px] text-gray-400 font-semibold">eventos</span>
+          </div>
+          <span class="text-[10px] text-gray-400 mt-1 block">Clic para ver todos</span>
+        </div>
+
+        <!-- En Proceso -->
+        <div onclick="filterLogisticsByStatus('En Proceso')" class="bg-white p-4 sm:p-5 rounded-2xl border border-amber-200/80 shadow-subtle hover:border-amber-400 transition-all cursor-pointer group">
+          <span class="text-xs font-bold text-amber-700 uppercase tracking-wider block">En Proceso</span>
+          <div class="mt-2 flex items-baseline gap-2">
+            <span id="logistics-kpi-proceso" class="text-2xl sm:text-3xl font-extrabold text-amber-600">0</span>
+            <span class="text-[11px] text-amber-500/80 font-semibold">armándose</span>
+          </div>
+          <span class="text-[10px] text-amber-600/70 mt-1 block">Clic para filtrar</span>
+        </div>
+
+        <!-- Armado (Listo para Etiquetar) -->
+        <div onclick="filterLogisticsByStatus('Armado')" class="bg-white p-4 sm:p-5 rounded-2xl border border-blue-200/80 shadow-subtle hover:border-blue-400 transition-all cursor-pointer group">
+          <span class="text-xs font-bold text-blue-700 uppercase tracking-wider block">Armados</span>
+          <div class="mt-2 flex items-baseline gap-2">
+            <span id="logistics-kpi-armado" class="text-2xl sm:text-3xl font-extrabold text-blue-600">0</span>
+            <span class="text-[11px] text-blue-500/80 font-semibold">listos para etiquetar</span>
+          </div>
+          <span class="text-[10px] text-blue-600/70 mt-1 block">Clic para filtrar</span>
+        </div>
+
+        <!-- Entregado -->
+        <div onclick="filterLogisticsByStatus('Entregado')" class="bg-white p-4 sm:p-5 rounded-2xl border border-emerald-200/80 shadow-subtle hover:border-emerald-400 transition-all cursor-pointer group">
+          <span class="text-xs font-bold text-emerald-700 uppercase tracking-wider block">Entregados</span>
+          <div class="mt-2 flex items-baseline gap-2">
+            <span id="logistics-kpi-entregado" class="text-2xl sm:text-3xl font-extrabold text-emerald-600">0</span>
+            <span class="text-[11px] text-emerald-500/80 font-semibold">despachados</span>
+          </div>
+          <span class="text-[10px] text-emerald-600/70 mt-1 block">Clic para filtrar</span>
+        </div>
+
+      </div>
+
+      <!-- Barra de Selección Rápida de Eventos Aprobados y Modo Manual -->
+      <div class="bg-white p-5 rounded-2xl border border-[#ede6de] shadow-subtle flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
+        <div class="flex-grow">
+          <div class="flex items-center gap-2 mb-1">
+            <label for="logistics-select-approved-event" class="block text-xs font-bold uppercase tracking-wider text-[#0f3042]">
+              Cargar Evento Aprobado (Resultados y Leads)
+            </label>
+            <span id="logistics-mode-pill" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
+              Eventos Aprobados
+            </span>
+          </div>
+          <span class="text-xs text-gray-500">
+            Selecciona un evento aprobado para cargar al instante su nombre, responsable, cédula, teléfono y dirección.
+          </span>
+        </div>
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full md:w-auto">
+          <div class="w-full sm:w-80">
+            <select id="logistics-select-approved-event" onchange="onSelectLogisticsApprovedEvent(this.value)" class="form-input text-xs font-semibold py-2.5 bg-[#faf7f2]">
+              <option value="">-- Seleccionar evento aprobado --</option>
+              <!-- Llenado dinámicamente con los eventos con status 'Aprobado' -->
+            </select>
+          </div>
+          <button type="button" onclick="startNewManualLogisticsPackage()" class="btn-secondary text-xs py-2.5 px-3.5 font-bold flex items-center justify-center gap-1.5 whitespace-nowrap bg-white border border-[#0f3042] text-[#0f3042] hover:bg-[#faf7f2] shadow-xs active:scale-95" title="Crear y armar un paquete para un evento manual no registrado">
+            <i class="fa-solid fa-plus-circle text-[#d87a86]"></i>
+            <span>+ Crear Evento</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Cuadrícula de Trabajo: Datos del Evento + Ítems y Materiales del Paquete -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        
+        <!-- Columna Izquierda: Datos del Evento, Cajas, Status Logístico y Acciones (6 cols) -->
+        <div class="lg:col-span-6 space-y-6">
+          
+          <!-- Bloque: Datos del Evento y Status -->
+          <div class="bg-white p-6 rounded-2xl border border-[#ede6de] shadow-subtle space-y-5">
+            <div class="flex items-center justify-between">
+              <h3 class="text-sm font-bold uppercase tracking-wider text-[#d87a86]">
+                1. Datos del Evento y Despacho
+              </h3>
+              <span id="logistics-edit-source-badge" class="text-[10px] font-bold px-2 py-0.5 rounded bg-gray-100 text-gray-600">
+                Nuevo Paquete
+              </span>
+            </div>
+
+            <!-- Selector Destacado de Status Logístico del Evento -->
+            <div class="p-3.5 bg-[#faf7f2] border border-[#ede6de] rounded-xl space-y-2">
+              <div class="flex items-center justify-between">
+                <label class="text-xs font-bold uppercase tracking-wider text-[#0f3042]">
+                  Status Logístico del Evento <span class="text-red-500">*</span>
+                </label>
+                <span id="logistics-status-current-label" class="text-xs font-extrabold px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800">
+                  En Proceso
+                </span>
+              </div>
+              <div class="grid grid-cols-3 gap-2">
+                <button type="button" id="btn-status-proceso" onclick="setLogisticsFormStatus('En Proceso')" class="py-2 px-2 rounded-xl text-xs font-bold border transition-all flex items-center justify-center gap-1.5 bg-amber-500 text-white border-amber-500 shadow-xs">
+                  <i class="fa-solid fa-hourglass-half text-[11px]"></i>
+                  <span>En Proceso</span>
+                </button>
+                <button type="button" id="btn-status-armado" onclick="setLogisticsFormStatus('Armado')" class="py-2 px-2 rounded-xl text-xs font-bold border transition-all flex items-center justify-center gap-1.5 bg-white text-gray-700 border-gray-200 hover:bg-blue-50 hover:text-blue-700 hover:border-blue-300">
+                  <i class="fa-solid fa-box-open text-[11px]"></i>
+                  <span>Armado</span>
+                </button>
+                <button type="button" id="btn-status-entregado" onclick="setLogisticsFormStatus('Entregado')" class="py-2 px-2 rounded-xl text-xs font-bold border transition-all flex items-center justify-center gap-1.5 bg-white text-gray-700 border-gray-200 hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-300">
+                  <i class="fa-solid fa-truck-fast text-[11px]"></i>
+                  <span>Entregado</span>
+                </button>
+              </div>
+              <input type="hidden" id="logistics-input-status" value="En Proceso">
+              <input type="hidden" id="logistics-current-package-id" value="">
+              <input type="hidden" id="logistics-current-request-id" value="">
+            </div>
+
+            <!-- Nombre del Evento -->
+            <div>
+              <div class="flex items-center justify-between mb-1.5">
+                <label for="logistics-input-event-name" class="text-xs font-bold uppercase tracking-wider text-[#0f3042]">
+                  Nombre del Evento <span class="text-red-500">*</span>
+                </label>
+                <span class="text-[11px] text-gray-400 font-medium">Editable</span>
+              </div>
+              <textarea id="logistics-input-event-name" rows="2" list="datalist-events" class="form-input font-bold uppercase text-xs leading-relaxed" placeholder="EJ: TORNEO FEMENINO INTYSQUAD & BIENESTAR 2026"></textarea>
+            </div>
+
+            <!-- Responsable que Retira y Cédula -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label for="logistics-input-responsible-name" class="block text-xs font-bold uppercase tracking-wider text-[#0f3042] mb-1.5">
+                  Responsable que Retira <span class="text-red-500">*</span>
+                </label>
+                <input type="text" id="logistics-input-responsible-name" list="datalist-names" class="form-input text-xs font-semibold" placeholder="EJ: Valeria Morales Rivas">
+              </div>
+              <div>
+                <label for="logistics-input-responsible-id" class="block text-xs font-bold uppercase tracking-wider text-[#0f3042] mb-1.5">
+                  Cédula / Identificación
+                </label>
+                <input type="text" id="logistics-input-responsible-id" list="datalist-cedulas" class="form-input text-xs font-mono font-semibold" placeholder="EJ: V- 25412890">
+              </div>
+            </div>
+
+            <!-- Teléfono -->
+            <div>
+              <label for="logistics-input-phone" class="block text-xs font-bold uppercase tracking-wider text-[#0f3042] mb-1.5">
+                Teléfono de Contacto <span class="text-red-500">*</span>
+              </label>
+              <input type="text" id="logistics-input-phone" list="datalist-phones" class="form-input text-xs font-mono font-semibold" placeholder="EJ: +58 412 889 4521">
+            </div>
+
+            <!-- Dirección de Entrega -->
+            <div>
+              <div class="flex items-center justify-between mb-1.5">
+                <label for="logistics-input-address" class="text-xs font-bold uppercase tracking-wider text-[#0f3042]">
+                  Dirección de Entrega / Despacho <span class="text-red-500">*</span>
+                </label>
+                <span class="text-[11px] text-gray-400 font-medium">Lugar del evento</span>
+              </div>
+              <textarea id="logistics-input-address" rows="2" list="datalist-locations" class="form-input font-semibold uppercase text-xs leading-relaxed" placeholder="EJ: CANCHAS LA GUAIRITA, COMPLEJO DEPORTIVO SPORT CENTER, CARACAS"></textarea>
+            </div>
+
+            <!-- Identificación de Cajas -->
+            <div class="pt-4 border-t border-[#ede6de]">
+              <div class="flex items-center justify-between mb-3">
+                <h4 class="text-xs font-bold uppercase tracking-wider text-[#0f3042]">
+                  Cajas y Distribución de Materiales
+                </h4>
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-[#faebee] text-[#d87a86]">Multi-caja</span>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div>
+                  <label for="logistics-input-box-num" class="block text-[11px] font-bold text-gray-500 mb-1">Caja Nº</label>
+                  <input type="number" id="logistics-input-box-num" list="datalist-box-counts" value="1" min="1" max="99" oninput="updateLogisticsBoxLabelText()" class="form-input text-xs font-extrabold text-center">
+                </div>
+                <div>
+                  <label for="logistics-input-box-total" class="block text-[11px] font-bold text-gray-500 mb-1">Total Cajas</label>
+                  <input type="number" id="logistics-input-box-total" list="datalist-box-counts" value="1" min="1" max="99" oninput="updateLogisticsBoxLabelText()" class="form-input text-xs font-extrabold text-center">
+                </div>
+                <div>
+                  <label for="logistics-input-box-label" class="block text-[11px] font-bold text-gray-500 mb-1">Texto Rótulo</label>
+                  <input type="text" id="logistics-input-box-label" value="CAJA 1/1" readonly class="form-input text-xs font-black uppercase text-center bg-gray-50">
+                </div>
+              </div>
+
+              <!-- Subtítulo de Caja -->
+              <div class="mt-3">
+                <label for="logistics-input-box-subtitle" class="block text-[11px] font-bold text-gray-500 mb-1">
+                  Subtítulo / Contenido de Caja (Opcional)
+                </label>
+                <input type="text" id="logistics-input-box-subtitle" list="datalist-box-subtitles" value="REGALOS EN STAND" oninput="updateLogisticsCurrentBoxSubtitle(this.value)" placeholder="EJ: REGALOS EN STAND, MATERIAL PROMOTORA..." class="form-input text-xs font-bold uppercase">
+              </div>
+            </div>
+
+            <!-- Nota Importante -->
+            <div class="pt-4 border-t border-[#ede6de]">
+              <label for="logistics-input-note" class="block text-xs font-bold uppercase tracking-wider text-[#0f3042] mb-1.5">
+                Nota Importante al Retirar / Despachar
+              </label>
+              <textarea id="logistics-input-note" rows="2" class="form-input font-bold uppercase text-xs leading-snug">POR FAVOR AL RETIRAR ESTE PAQUETE, NOTIFICAR AL EQUIPO DE RELACIONES PÚBLICAS</textarea>
+            </div>
+
+            <!-- Botones de Acción del Formulario -->
+            <div class="pt-4 border-t border-[#ede6de] flex flex-wrap items-center gap-2.5 justify-between">
+              <div class="flex items-center gap-2">
+                <button type="button" onclick="saveLogisticsPackage()" class="btn-primary text-xs py-2.5 px-4 font-bold shadow-xs cursor-pointer active:scale-95 flex items-center gap-1.5" title="Guardar este paquete en el control de logística">
+                  <i class="fa-solid fa-floppy-disk"></i>
+                  <span>Guardar en Logística</span>
+                </button>
+                
+                <!-- Botón ETIQUETAR (Destacado y siempre disponible, pulsa si está armado) -->
+                <button type="button" id="btn-logistics-label-action" onclick="labelCurrentLogisticsPackage()" class="text-xs py-2.5 px-4 font-extrabold rounded-xl transition-all flex items-center gap-1.5 bg-[#d87a86] hover:bg-[#ba5763] text-white shadow-xs cursor-pointer active:scale-95" title="Cargar directamente en la sección de Etiquetado para imprimir rótulos">
+                  <i class="fa-solid fa-tags"></i>
+                  <span>Etiquetar</span>
+                </button>
+              </div>
+
+              <div class="flex items-center gap-2">
+                <button type="button" onclick="printSingleLogisticsSheet()" class="btn-secondary text-xs py-2 px-3 text-[#0f3042] hover:bg-[#faebee] hover:border-[#d87a86] flex items-center gap-1.5 transition-colors font-bold shadow-2xs cursor-pointer" title="Imprimir hoja de materiales e ítems a armar">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-[#0f3042]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4H7v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                  <span>Imprimir Materiales</span>
+                </button>
+                <button type="button" onclick="resetLogisticsForm()" class="btn-secondary text-xs py-2 px-3 text-gray-500 hover:text-red-600 transition-colors" title="Limpiar formulario">
+                  <span>Limpiar</span>
+                </button>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+        <!-- Columna Derecha: Catálogo de Ítems y Materiales (Idéntico a Etiquetado) (6 cols) -->
+        <div class="lg:col-span-6 space-y-6">
+          
+          <div class="bg-white p-6 rounded-2xl border border-[#ede6de] shadow-subtle space-y-5">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div>
+                <h3 class="text-sm font-bold uppercase tracking-wider text-[#d87a86]">
+                  2. Ítems y Materiales a Armar (Los 41 Productos)
+                </h3>
+                <p class="text-xs text-gray-500 mt-0.5">
+                  Asigna las cantidades exactas por caja para armar el paquete. Todo lo cargado aquí se reflejará en Etiquetado.
+                </p>
+              </div>
+
+              <div id="logistics-products-counter" class="px-3 py-1 rounded-full bg-[#faebee] text-[#d87a86] text-xs font-bold whitespace-nowrap self-start sm:self-auto">
+                0 items
+              </div>
+            </div>
+
+            <!-- Selector Dinámico de Cajas en Logística -->
+            <div class="p-3.5 bg-[#faf7f2] border border-[#ede6de] rounded-xl space-y-2.5">
+              <div class="flex flex-wrap items-center justify-between gap-2">
+                <div>
+                  <span class="text-xs font-black text-[#0f3042] uppercase tracking-wide">Configurar Ítems por Caja:</span>
+                  <span class="text-[11px] text-gray-500 block">Selecciona cada caja para asignar sus materiales específicos</span>
+                </div>
+                <div class="flex items-center gap-1.5">
+                  <button type="button" onclick="copyCurrentLogisticsBoxItemsToAll()" class="px-2.5 py-1 text-[11px] font-bold text-[#0f3042] bg-white border border-[#ede6de] hover:bg-gray-100 rounded-lg shadow-xs" title="Copiar estos materiales a todas las cajas">
+                    Copiar a todas
+                  </button>
+                  <button type="button" onclick="clearCurrentLogisticsBoxItems()" class="px-2.5 py-1 text-[11px] font-bold text-red-600 bg-white border border-red-200 hover:bg-red-50 rounded-lg shadow-xs" title="Poner en 0 esta caja">
+                    Limpiar caja
+                  </button>
+                </div>
+              </div>
+              <div class="flex flex-wrap gap-1.5" id="logistics-box-tabs-container">
+                <!-- Se llena dinámicamente con [Caja 1/1 (X un.)] etc. -->
+              </div>
+            </div>
+
+            <!-- Buscador y Poner en 0 -->
+            <div class="flex flex-wrap items-center gap-2">
+              <div class="relative flex-grow min-w-[200px]">
+                <input type="text" id="logistics-product-search" oninput="filterLogisticsProducts(this.value)" placeholder="Buscar producto de los 41 ítems..." class="form-input text-xs py-2">
+              </div>
+              <button onclick="resetAllLogisticsProductQtys()" class="px-3.5 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-xs font-bold transition-colors" title="Poner todas las cantidades en 0 para esta caja">
+                Poner en 0
+              </button>
+            </div>
+
+            <!-- Chips de Filtro Rápido por Categoría -->
+            <div class="flex flex-wrap gap-1.5 pt-1">
+              <button type="button" onclick="filterLogisticsCategory('')" class="category-chip-logistics active text-[10px] px-2.5 py-1 rounded-full border border-[#d87a86] bg-[#d87a86] text-white font-bold transition-all">Todos (41)</button>
+              <button type="button" onclick="filterLogisticsCategory('muestras')" class="category-chip-logistics text-[10px] px-2.5 py-1 rounded-full border border-gray-200 bg-white text-gray-600 font-bold hover:border-[#d87a86] transition-all">Muestras & Sachets</button>
+              <button type="button" onclick="filterLogisticsCategory('bolsos')" class="category-chip-logistics text-[10px] px-2.5 py-1 rounded-full border border-gray-200 bg-white text-gray-600 font-bold hover:border-[#d87a86] transition-all">Bolsos & Kits</button>
+              <button type="button" onclick="filterLogisticsCategory('abanicos')" class="category-chip-logistics text-[10px] px-2.5 py-1 rounded-full border border-gray-200 bg-white text-gray-600 font-bold hover:border-[#d87a86] transition-all">Abanicos</button>
+              <button type="button" onclick="filterLogisticsCategory('cuidado personal')" class="category-chip-logistics text-[10px] px-2.5 py-1 rounded-full border border-gray-200 bg-white text-gray-600 font-bold hover:border-[#d87a86] transition-all">Cuidado Íntimo</button>
+              <button type="button" onclick="filterLogisticsCategory('logística')" class="category-chip-logistics text-[10px] px-2.5 py-1 rounded-full border border-gray-200 bg-white text-gray-600 font-bold hover:border-[#d87a86] transition-all">Logística & Stand</button>
+              <button type="button" onclick="filterLogisticsCategory('uniformes')" class="category-chip-logistics text-[10px] px-2.5 py-1 rounded-full border border-gray-200 bg-white text-gray-600 font-bold hover:border-[#d87a86] transition-all">Uniformes</button>
+              <button type="button" onclick="filterLogisticsCategory('material pop')" class="category-chip-logistics text-[10px] px-2.5 py-1 rounded-full border border-gray-200 bg-white text-gray-600 font-bold hover:border-[#d87a86] transition-all">Material POP</button>
+              <button type="button" onclick="filterLogisticsCategory('oficina')" class="category-chip-logistics text-[10px] px-2.5 py-1 rounded-full border border-gray-200 bg-white text-gray-600 font-bold hover:border-[#d87a86] transition-all">Oficina & Papelería</button>
+            </div>
+
+            <!-- Contenedor de la Lista de Productos en Logística -->
+            <div id="logistics-products-container" class="max-h-[580px] overflow-y-auto space-y-2 pr-1 divide-y divide-gray-100 border border-gray-100 p-2 rounded-xl bg-gray-50/50">
+              <!-- Rellenado dinámicamente con los 42 productos (incluyendo Otro:) -->
+            </div>
+
+            <!-- Resumen de Totales Asignados en Caja -->
+            <div id="logistics-selected-summary" class="p-4 bg-[#faf7f2] rounded-xl border border-[#ede6de] text-xs space-y-2">
+              <div class="flex items-center justify-between font-bold text-[#0f3042]">
+                <span>Resumen de Materiales en Caja:</span>
+                <span id="logistics-total-units-badge" class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold">0 unidades totales</span>
+              </div>
+              <div id="logistics-selected-list-preview" class="text-gray-600 font-medium space-y-1 max-h-24 overflow-y-auto">
+                <span class="text-gray-400 italic">No hay productos seleccionados aún. Ingresa cantidades en los campos de arriba.</span>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- Tabla de Control de Paquetes y Eventos en Logística -->
+      <div class="bg-white p-6 rounded-2xl border border-[#ede6de] shadow-subtle space-y-5">
+        
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-[#ede6de]">
+          <div>
+            <h3 class="text-lg font-bold text-[#0f3042]">
+              Eventos y Paquetes en Logística
+            </h3>
+            <p class="text-xs text-gray-500">
+              Listado general de eventos en preparación, armados y despachados con desglose de materiales.
+            </p>
+          </div>
+
+          <!-- Filtros de la Tabla: Búsqueda y Botones de Status -->
+          <div class="flex flex-wrap items-center gap-2">
+            <div class="relative w-full sm:w-64">
+              <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
+              <input type="text" id="logistics-table-search" oninput="onLogisticsTableSearch(this.value)" placeholder="Buscar evento, responsable..." class="form-input text-xs pl-8 py-2">
+            </div>
+
+            <!-- Filtros rápidos por status -->
+            <div class="flex items-center gap-1 bg-[#faf7f2] p-1 rounded-xl border border-[#ede6de]">
+              <button type="button" onclick="filterLogisticsByStatus('todos')" id="filter-btn-log-todos" class="logistics-status-filter-btn active text-[11px] px-3 py-1 rounded-lg font-bold transition-all bg-[#0f3042] text-white">
+                Todos
+              </button>
+              <button type="button" onclick="filterLogisticsByStatus('En Proceso')" id="filter-btn-log-proceso" class="logistics-status-filter-btn text-[11px] px-3 py-1 rounded-lg font-bold transition-all text-gray-600 hover:text-[#0f3042]">
+                En Proceso
+              </button>
+              <button type="button" onclick="filterLogisticsByStatus('Armado')" id="filter-btn-log-armado" class="logistics-status-filter-btn text-[11px] px-3 py-1 rounded-lg font-bold transition-all text-gray-600 hover:text-[#0f3042]">
+                Armado
+              </button>
+              <button type="button" onclick="filterLogisticsByStatus('Entregado')" id="filter-btn-log-entregado" class="logistics-status-filter-btn text-[11px] px-3 py-1 rounded-lg font-bold transition-all text-gray-600 hover:text-[#0f3042]">
+                Entregado
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tabla Responsive -->
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="bg-[#faf7f2] border-b border-[#ede6de] text-[11px] font-bold text-gray-500 uppercase tracking-wider">
+                <th class="py-3 px-3.5">Código</th>
+                <th class="py-3 px-3.5">Evento</th>
+                <th class="py-3 px-3.5">Responsable / Entrega</th>
+                <th class="py-3 px-3.5 text-center">Cajas e Ítems</th>
+                <th class="py-3 px-3.5 text-center">Status Logístico</th>
+                <th class="py-3 px-3.5 text-right">Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="logistics-table-tbody" class="divide-y divide-[#ede6de] text-xs">
+              <!-- Rellenado dinámicamente con renderLogisticsTable() -->
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- ============================================================== -->
+    <!-- NUEVA SECCIÓN: ETIQUETADO DE CAJAS (SOLO ADMINS)              -->
+    <!-- ============================================================== -->
+    <section id="view-labeling" class="hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 animate-fade-in">
+      
+      <!-- Header de la Sección -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-[#ede6de]">
+        <div>
+          <div class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-[#0f3042] text-white mb-2">
+            Gestión de Despacho y Logística
+          </div>
+          <h2 class="text-2xl sm:text-3xl font-extrabold text-[#0f3042]">Etiquetado y Rotulado de Cajas</h2>
+          <p class="text-xs sm:text-sm text-gray-500 max-w-3xl">
+            Genera la hoja oficial de rotulado de caja para eventos en formato carta (8.5" x 11"). Selecciona un evento postulado o edita los datos manualmente, define las cantidades de productos y procesa la hoja lista para imprimir, descargar en PDF o Word (.docx).
+          </p>
+        </div>
+      </div>
+
+      <!-- Selector Rápido de Evento Postulado -->
+      <div class="bg-white p-5 rounded-2xl border border-[#ede6de] shadow-subtle flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
+        <div>
+          <label for="label-select-event" class="block text-xs font-bold uppercase tracking-wider text-[#0f3042]">
+            Autorrellenar desde Evento Registrado
+          </label>
+          <span class="text-xs text-gray-500">
+            Selecciona una solicitud para cargar automáticamente el nombre, responsable, teléfono y ubicación.
+          </span>
+        </div>
+        <div class="w-full md:w-96">
+          <select id="label-select-event" onchange="onSelectLabelEvent(this.value)" class="form-input text-xs font-semibold py-2.5 bg-[#faf7f2]">
+            <option value="">-- Seleccionar evento registrado --</option>
+            <!-- Llenado dinámicamente con las solicitudes de AppState.requests -->
+          </select>
+        </div>
+      </div>
+
+      <!-- Cuadrícula Principal: Formulario de Configuración + Previsualización en Vivo de la Hoja de Rotulado -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        
+        <!-- Columna Izquierda: Datos del Evento, Caja y Lista de Productos (6 cols) -->
+        <div class="lg:col-span-6 space-y-6">
+          
+          <!-- Bloque 1: Datos Principales del Evento y Despacho -->
+          <div class="bg-white p-6 rounded-2xl border border-[#ede6de] shadow-subtle space-y-5">
+            <h3 class="text-sm font-bold uppercase tracking-wider text-[#d87a86]">
+              1. Datos del Evento y Despacho
+            </h3>
+
+            <!-- Nombre del Evento (Editable) -->
+            <div>
+              <div class="flex items-center justify-between mb-1.5">
+                <label for="label-input-event-name" class="text-xs font-bold uppercase tracking-wider text-[#0f3042]">
+                  Nombre del Evento <span class="text-red-500">*</span>
+                </label>
+                <span class="text-[11px] text-gray-400 font-medium">Editable por Administrador</span>
+              </div>
+              <textarea id="label-input-event-name" rows="3" oninput="updateLiveLabelSheet()" class="form-input font-bold uppercase text-xs leading-relaxed" placeholder="EJ: 6TA EDICION CARRERA CAMINATA 5K POR LA CONCIENTIZACION DEL CANCER DE MAMA FUCCAM 25 DE OCTUBRE | MATERIAL PROMOTORA VALERIA LEONES PUEBLO NUEVO"></textarea>
+            </div>
+
+            <!-- Responsable que Retira y Cédula (Editable) -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label for="label-input-responsible-name" class="block text-xs font-bold uppercase tracking-wider text-[#0f3042] mb-1.5">
+                  Responsable que Retira <span class="text-red-500">*</span>
+                </label>
+                <input type="text" id="label-input-responsible-name" list="datalist-names" oninput="updateLiveLabelSheet()" class="form-input text-xs font-semibold" placeholder="EJ: Valeria Leones">
+              </div>
+              <div>
+                <label for="label-input-responsible-id" class="block text-xs font-bold uppercase tracking-wider text-[#0f3042] mb-1.5">
+                  Cédula / Identificación
+                </label>
+                <input type="text" id="label-input-responsible-id" list="datalist-cedulas" oninput="updateLiveLabelSheet()" class="form-input text-xs font-mono font-semibold" placeholder="EJ: V- 32196229">
+              </div>
+            </div>
+
+            <!-- Teléfono (Editable) -->
+            <div>
+              <label for="label-input-phone" class="block text-xs font-bold uppercase tracking-wider text-[#0f3042] mb-1.5">
+                Teléfono de Contacto <span class="text-red-500">*</span>
+              </label>
+              <input type="text" id="label-input-phone" list="datalist-phones" oninput="updateLiveLabelSheet()" class="form-input text-xs font-mono font-semibold" placeholder="EJ: 04126681611">
+            </div>
+
+            <!-- Dirección (Editable por el Administrador) -->
+            <div>
+              <div class="flex items-center justify-between mb-1.5">
+                <label for="label-input-address" class="text-xs font-bold uppercase tracking-wider text-[#0f3042]">
+                  Dirección de Entrega / Despacho <span class="text-red-500">*</span>
+                </label>
+                <span class="text-[11px] text-gray-400 font-medium">Editable (varía según entrega)</span>
+              </div>
+              <textarea id="label-input-address" rows="3" oninput="updateLiveLabelSheet()" class="form-input font-semibold uppercase text-xs leading-relaxed" placeholder="EJ: GUACUIRA ARRIBA, MUNICIPIO FALCÓN. ESTADO FALCÓN, DETRÁS DE LA PARADA, CASA SIN NÚMERO"></textarea>
+            </div>
+
+            <!-- Configuración de Caja (Letra Grande y Modificable) -->
+            <div class="pt-4 border-t border-[#ede6de]">
+              <div class="flex items-center justify-between mb-3">
+                <h4 class="text-xs font-bold uppercase tracking-wider text-[#0f3042]">
+                  Identificación de Caja (Formato Grande)
+                </h4>
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-[#faebee] text-[#d87a86]">Letra Gigante</span>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div>
+                  <label for="label-input-box-num" class="block text-[11px] font-bold text-gray-500 mb-1">Caja Nº</label>
+                  <input type="number" id="label-input-box-num" list="datalist-box-counts" value="1" min="1" max="99" oninput="updateBoxLabelText()" class="form-input text-xs font-extrabold text-center">
+                </div>
+                <div>
+                  <label for="label-input-box-total" class="block text-[11px] font-bold text-gray-500 mb-1">Total Cajas</label>
+                  <input type="number" id="label-input-box-total" list="datalist-box-counts" value="1" min="1" max="99" oninput="updateBoxLabelText()" class="form-input text-xs font-extrabold text-center">
+                </div>
+                <div>
+                  <label for="label-input-box-label" class="block text-[11px] font-bold text-gray-500 mb-1">Texto Rótulo</label>
+                  <input type="text" id="label-input-box-label" value="CAJA 1/1" oninput="updateLiveLabelSheet()" class="form-input text-xs font-black uppercase text-center bg-gray-50">
+                </div>
+              </div>
+
+              <!-- Subtítulo de Caja (ej. REGALOS EN STAND) -->
+              <div class="mt-3">
+                <label for="label-input-box-subtitle" class="block text-[11px] font-bold text-gray-500 mb-1">
+                  Subtítulo / Contenido de Caja (Opcional)
+                </label>
+                <input type="text" id="label-input-box-subtitle" list="datalist-box-subtitles" value="REGALOS EN STAND" oninput="updateLiveLabelSheet()" placeholder="EJ: REGALOS EN STAND, MATERIAL PROMOTORA..." class="form-input text-xs font-bold uppercase">
+              </div>
+
+            </div>
+
+            <!-- Nota Importante (Editable) -->
+            <div class="pt-4 border-t border-[#ede6de]">
+              <label for="label-input-note" class="block text-xs font-bold uppercase tracking-wider text-[#0f3042] mb-1.5">
+                Nota Importante al Retirar
+              </label>
+              <textarea id="label-input-note" rows="2" oninput="updateLiveLabelSheet()" class="form-input font-bold uppercase text-xs leading-snug">POR FAVOR AL RETIRAR ESTE PAQUETE, NOTIFICAR AL EQUIPO DE RELACIONES PÚBLICAS</textarea>
+              <span class="text-[10px] text-gray-400 mt-1 block">Mensaje institucional que debe salir en el recuadro inferior de la hoja.</span>
+            </div>
+
+          </div>
+
+          <!-- Bloque 2: CATÁLOGO COMPLETO DE LOS 42 ÍTEMS CON CANTIDADES -->
+          <div class="bg-white p-6 rounded-2xl border border-[#ede6de] shadow-subtle space-y-5">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div>
+                <h3 class="text-sm font-bold uppercase tracking-wider text-[#d87a86]">
+                  <span>2. Ítems para Agregar Cantidades (Los 41 Productos)</span>
+                </h3>
+                <p class="text-xs text-gray-500 mt-0.5">
+                  Ingresa las cantidades en unidades para que se reflejen automáticamente en el rótulo de la caja.
+                </p>
+              </div>
+
+              <div id="label-products-counter" class="px-3 py-1 rounded-full bg-[#faebee] text-[#d87a86] text-xs font-bold whitespace-nowrap self-start sm:self-auto">
+                0 items
+              </div>
+            </div>
+
+            <!-- Selector Dinámico de Cajas para Asignar Ítems Independientes -->
+            <div id="box-tabs-section" class="p-3.5 bg-[#faf7f2] border border-[#ede6de] rounded-xl space-y-2.5">
+              <div class="flex flex-wrap items-center justify-between gap-2">
+                <div>
+                  <span class="text-xs font-black text-[#0f3042] uppercase tracking-wide">Configurar Ítems por Caja:</span>
+                  <span class="text-[11px] text-gray-500 block">Selecciona cada caja para identificar sus productos específicos</span>
+                </div>
+                <div class="flex items-center gap-1.5">
+                  <button type="button" onclick="copyCurrentBoxItemsToAll()" class="px-2.5 py-1 text-[11px] font-bold text-[#0f3042] bg-white border border-[#ede6de] hover:bg-gray-100 rounded-lg shadow-xs" title="Copiar estos productos a todas las cajas">
+                    Copiar a todas las cajas
+                  </button>
+                  <button type="button" onclick="clearCurrentBoxItems()" class="px-2.5 py-1 text-[11px] font-bold text-red-600 bg-white border border-red-200 hover:bg-red-50 rounded-lg shadow-xs" title="Poner en 0 esta caja">
+                    Limpiar caja
+                  </button>
+                </div>
+              </div>
+              <div class="flex flex-wrap gap-1.5" id="box-tabs-container">
+                <!-- Se llena dinámicamente con [Caja 1/3 (5 un.)] [Caja 2/3 (3 un.)] etc. -->
+              </div>
+            </div>
+
+            <!-- Buscador y Botón de Reiniciar a 0 -->
+            <div class="flex flex-wrap items-center gap-2">
+              <div class="relative flex-grow min-w-[200px]">
+                <input type="text" id="label-product-search" oninput="filterLabelProducts(this.value)" placeholder="Buscar producto de los 41 ítems..." class="form-input text-xs py-2">
+              </div>
+              <button onclick="resetAllProductQtys()" class="px-3.5 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-xs font-bold transition-colors" title="Poner todas las cantidades en 0">
+                Poner en 0
+              </button>
+            </div>
+
+            <!-- Chips de Filtro Rápido por Categoría -->
+            <div class="flex flex-wrap gap-1.5 pt-1">
+              <button type="button" onclick="filterLabelCategory('')" class="category-chip active text-[10px] px-2.5 py-1 rounded-full border border-[#d87a86] bg-[#d87a86] text-white font-bold transition-all">Todos (41)</button>
+              <button type="button" onclick="filterLabelCategory('muestras')" class="category-chip text-[10px] px-2.5 py-1 rounded-full border border-gray-200 bg-white text-gray-600 font-bold hover:border-[#d87a86] transition-all">Muestras & Sachets</button>
+              <button type="button" onclick="filterLabelCategory('bolsos')" class="category-chip text-[10px] px-2.5 py-1 rounded-full border border-gray-200 bg-white text-gray-600 font-bold hover:border-[#d87a86] transition-all">Bolsos & Kits</button>
+              <button type="button" onclick="filterLabelCategory('abanicos')" class="category-chip text-[10px] px-2.5 py-1 rounded-full border border-gray-200 bg-white text-gray-600 font-bold hover:border-[#d87a86] transition-all">Abanicos</button>
+              <button type="button" onclick="filterLabelCategory('cuidado personal')" class="category-chip text-[10px] px-2.5 py-1 rounded-full border border-gray-200 bg-white text-gray-600 font-bold hover:border-[#d87a86] transition-all">Cuidado Íntimo</button>
+              <button type="button" onclick="filterLabelCategory('logística')" class="category-chip text-[10px] px-2.5 py-1 rounded-full border border-gray-200 bg-white text-gray-600 font-bold hover:border-[#d87a86] transition-all">Logística & Stand</button>
+              <button type="button" onclick="filterLabelCategory('uniformes')" class="category-chip text-[10px] px-2.5 py-1 rounded-full border border-gray-200 bg-white text-gray-600 font-bold hover:border-[#d87a86] transition-all">Uniformes</button>
+              <button type="button" onclick="filterLabelCategory('material pop')" class="category-chip text-[10px] px-2.5 py-1 rounded-full border border-gray-200 bg-white text-gray-600 font-bold hover:border-[#d87a86] transition-all">Material POP</button>
+              <button type="button" onclick="filterLabelCategory('oficina')" class="category-chip text-[10px] px-2.5 py-1 rounded-full border border-gray-200 bg-white text-gray-600 font-bold hover:border-[#d87a86] transition-all">Oficina & Papelería</button>
+            </div>
+
+            <!-- Contenedor de la Lista de Productos -->
+            <div id="label-products-container" class="max-h-[640px] overflow-y-auto space-y-2 pr-1 divide-y divide-gray-100 border border-gray-100 p-2 rounded-xl bg-gray-50/50">
+              <!-- Rellenado dinámicamente con los 42 productos listos -->
+            </div>
+
+            <!-- Resumen de Totales Asignados -->
+            <div id="label-selected-summary" class="p-4 bg-[#faf7f2] rounded-xl border border-[#ede6de] text-xs space-y-2">
+              <div class="flex items-center justify-between font-bold text-[#0f3042]">
+                <span>Resumen de Ítems en Caja:</span>
+                <span id="label-total-units-badge" class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold">0 unidades totales</span>
+              </div>
+              <div id="label-selected-list-preview" class="text-gray-600 font-medium space-y-1 max-h-28 overflow-y-auto">
+                <span class="text-gray-400 italic">No hay productos seleccionados aún. Ingresa cantidades en los campos de arriba.</span>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+        <!-- Columna Derecha: PREVISUALIZACIÓN EN VIVO DE LA HOJA DE ROTULADO (6 cols) -->
+        <div class="lg:col-span-6 lg:sticky lg:top-28 space-y-4">
+          
+          <div class="bg-white p-5 rounded-2xl border border-[#ede6de] shadow-xl space-y-4">
+            
+            <!-- Barra Superior de la Previsualización -->
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-gray-200">
+              <div>
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 uppercase tracking-wider mb-1">
+                  <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                  Rótulo en Tiempo Real
+                </span>
+                <h3 class="text-sm font-extrabold text-[#0f3042]">Hoja de Rotulado</h3>
+              </div>
+
+              <!-- Acciones Rápidas Directas (Solo texto, sin iconos) -->
+              <div class="flex flex-wrap items-center gap-1.5">
+                <button onclick="printLabelSheet()" class="px-3.5 py-1.5 bg-[#0f3042] hover:bg-[#163f53] text-white rounded-lg text-xs font-bold shadow-xs transition-transform active:scale-95" title="Imprimir en hoja tamaño carta">
+                  <span>Imprimir</span>
+                </button>
+                <button onclick="exportLabelToPdf()" class="px-3.5 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs font-bold shadow-xs transition-transform active:scale-95" title="Exportar a PDF">
+                  <span>PDF</span>
+                </button>
+                <button onclick="exportLabelToWord()" class="px-3.5 py-1.5 bg-blue-700 hover:bg-blue-800 text-white rounded-lg text-xs font-bold shadow-xs transition-transform active:scale-95" title="Exportar a Microsoft Word (.docx)">
+                  <span>Word</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Selector de Previsualización de Cajas -->
+            <div class="flex flex-wrap items-center justify-between gap-2 pb-2">
+              <span class="text-[11px] font-bold text-gray-500 uppercase">Previsualizar Rótulo:</span>
+              <div id="live-pv-box-selector" class="flex flex-wrap gap-1.5">
+                <!-- Generado dinámicamente: [Ver Todas (N)] [Caja 1/N] [Caja 2/N] ... -->
+              </div>
+            </div>
+
+            <!-- HOJAS REFLEJADAS EN VIVO (Formato Carta 8.5" x 11" por caja) -->
+            <div class="bg-gray-100 p-2 sm:p-4 rounded-xl border border-gray-200 overflow-x-auto max-h-[740px] overflow-y-auto">
+              <div id="live-pv-sheets-wrapper" class="space-y-6">
+                <!-- Rellenado dinámicamente con las hojas de cada caja por updateLiveLabelSheet() -->
+              </div>
+            </div>
+
+            <!-- Botón Grande Procesar / Imprimir (Solo texto, sin icono) -->
+            <button onclick="processLabelSheet()" class="btn-primary w-full py-3.5 text-xs sm:text-sm font-bold shadow-lg flex items-center justify-center hover:scale-[1.01] transition-transform">
+              <span>PROCESAR Y ABRIR EN PANTALLA COMPLETA</span>
+            </button>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- ============================================================== -->
+  <!-- MODALES DE LA APLICACIÓN                                       -->
+  <!-- ============================================================== -->
+
+  <!-- 1. Modal Simulador Oficial de Google OAuth -->
+  <div id="modal-google-auth" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop animate-fade-in">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-gray-200 relative">
+      <button onclick="closeGoogleLoginModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+        <i class="fa-solid fa-xmark text-lg"></i>
+      </button>
+
+      <div class="text-center pb-4 border-b border-gray-100">
+        <svg class="w-9 h-9 mx-auto mb-2" viewBox="0 0 24 24">
+          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+          <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+          <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+        </svg>
+        <h3 class="text-lg font-bold text-gray-800">Iniciar sesión con Google</h3>
+        <p class="text-xs text-gray-500">Selecciona o ingresa una cuenta para continuar hacia INTYEVENTS</p>
+      </div>
+
+      <!-- Cuentas usadas previamente en este computador (SOLO si existen) -->
+      <div id="modal-saved-accounts-container" class="space-y-2 py-3 border-b border-gray-100 hidden">
+        <span class="text-xs font-semibold text-[#0f3042] block flex items-center gap-1.5">
+          <i class="fa-solid fa-laptop text-[#d87a86]"></i> Cuentas registradas en este equipo:
+        </span>
+        <div id="modal-saved-accounts-list" class="space-y-1.5 max-h-40 overflow-y-auto pr-1">
+          <!-- Renderizado dinámico desde este equipo -->
+        </div>
+      </div>
+
+      <!-- Ingresar Cuenta con Autorrelleno -->
+      <form onsubmit="handleModalGoogleLogin(event)" class="pt-3 space-y-3">
+        <span class="text-xs font-semibold text-gray-700 block">Ingresa tus datos para continuar:</span>
+        <div class="space-y-2">
+          <div>
+            <label class="form-label text-[11px]">Nombre Completo <span class="req">*</span></label>
+            <input type="text" id="google-custom-name" name="name" list="datalist-names" autocomplete="name" required placeholder="Tu Nombre y Apellido" class="form-input text-xs py-2">
+          </div>
+          <div>
+            <label class="form-label text-[11px]">Correo Electrónico (Google) <span class="req">*</span></label>
+            <input type="email" id="google-custom-email" name="email" list="datalist-google-emails" autocomplete="email" oninput="onGoogleModalEmailInput(this.value)" required placeholder="tu.correo@gmail.com" class="form-input text-xs py-2">
+            <span class="text-[10px] text-gray-400 mt-0.5 block">Autorrelleno habilitado: selecciona o escribe tus primeras letras para autocompletar.</span>
+          </div>
+        </div>
+        <button type="submit" class="btn-primary w-full py-2.5 text-xs">
+          <span>Ingresar a Eventos</span>
+        </button>
+      </form>
+
+    </div>
+  </div>
+
+  <!-- 2. Modal de Login para Administrador -->
+  <div id="modal-admin-auth" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop animate-fade-in">
+    <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl border border-gray-200 relative">
+      <button onclick="closeAdminLoginModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+        <i class="fa-solid fa-xmark text-lg"></i>
+      </button>
+
+      <div class="text-center pb-4 border-b border-gray-100">
+        <div class="w-12 h-12 rounded-full bg-[#0f3042] text-[#d87a86] flex items-center justify-center mx-auto mb-2 text-lg">
+          <i class="fa-solid fa-shield-halved"></i>
+        </div>
+        <h3 class="text-lg font-bold text-[#0f3042]">Acceso Administrativo</h3>
+        <p class="text-xs text-gray-500">Solo personal autorizado de Mercadeo</p>
+      </div>
+
+      <form onsubmit="handleAdminLogin(event)" class="space-y-4 pt-4">
+        <div>
+          <label class="form-label text-xs">Correo Electrónico de Administrador</label>
+          <input type="email" id="admin-email" list="datalist-admin-emails" autocomplete="email" value="" required placeholder="samivivasintyeventos@intylact.com" class="form-input text-xs py-2.5">
+        </div>
+
+        <div>
+          <label class="form-label text-xs">Contraseña de Acceso</label>
+          <div class="relative">
+            <input type="password" id="admin-password" value="" required placeholder="Introduce tu clave secreta" class="form-input text-xs py-2.5 pr-10">
+            <button type="button" onclick="toggleAdminPasswordVisibility()" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none">
+              <i id="toggle-pwd-icon" class="fa-solid fa-eye-slash text-xs"></i>
+            </button>
+          </div>
+        </div>
+
+        <button type="submit" class="btn-primary w-full py-2.5 text-xs">
+          <span>Ingresar al Panel de Administración</span>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 3. Modal Lightbox para Ampliar Fotos de Galería Adaptable a Móvil y Pantallas Grandes -->
+  <div id="modal-lightbox" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-md animate-fade-in" onclick="closeLightbox()">
+    <div class="lightbox-modal-content" onclick="event.stopPropagation()">
+      <button onclick="closeLightbox()" class="absolute -top-10 right-0 text-white text-2xl hover:text-[#d87a86] transition-colors">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+
+      <div class="rounded-2xl overflow-hidden bg-black shadow-2xl flex items-center justify-center">
+        <img id="lightbox-image" src="" alt="Ampliación" class="lightbox-image-adaptive">
+      </div>
+
+      <div class="text-center mt-3 text-white">
+        <h4 id="lightbox-title" class="text-lg font-bold">Título</h4>
+        <p id="lightbox-desc" class="text-xs text-gray-300 mt-0.5">Descripción</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. Modal de Detalle de Solicitud de Evento (DataGrid Admin) -->
+  <div id="modal-request-detail" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop animate-fade-in">
+    <div class="bg-white rounded-2xl max-w-3xl w-full max-h-[90vh] flex flex-col shadow-2xl border border-gray-200 overflow-hidden">
+      
+      <!-- Modal Header -->
+      <div class="p-4 sm:p-5 border-b border-gray-200 flex items-center justify-between bg-gray-50">
+        <div class="flex items-center gap-2">
+          <i class="fa-solid fa-clipboard-check text-[#d87a86] text-lg"></i>
+          <h3 class="text-base font-bold text-[#0f3042]">Ficha Completa de Postulación de Evento</h3>
+        </div>
+        <button onclick="closeRequestDetailModal()" class="text-gray-400 hover:text-gray-600 p-1">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <!-- Modal Body con Scroll -->
+      <div id="detail-modal-body" class="p-5 sm:p-6 overflow-y-auto space-y-4">
+        <!-- Rellenado dinámicamente por JS -->
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="p-4 border-t border-gray-200 flex items-center justify-between bg-gray-50">
+        <button onclick="window.print()" class="text-xs font-semibold text-gray-600 hover:text-[#0f3042]">
+          Imprimir Ficha
+        </button>
+        <button onclick="closeRequestDetailModal()" class="btn-primary py-2 px-5 text-xs">
+          Cerrar
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 5. Modal de Conexión / Integraciones (Google Sheets, Zapier, Cloud Storage) -->
+  <div id="modal-integrations" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop animate-fade-in">
+    <div class="bg-white rounded-2xl max-w-xl w-full p-6 shadow-2xl border border-gray-200 relative max-h-[90vh] overflow-y-auto">
+      <button onclick="closeIntegrationSettingsModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+        <i class="fa-solid fa-xmark text-lg"></i>
+      </button>
+
+      <div class="pb-3 border-b border-gray-100">
+        <h3 class="text-lg font-bold text-[#0f3042] flex items-center gap-2">
+          <i class="fa-solid fa-plug text-[#d87a86]"></i> Integración API, Google Sheets y Cloud Storage
+        </h3>
+        <p class="text-xs text-gray-500 mt-1">Conecta este portal a tus flujos automatizados en tiempo real.</p>
+      </div>
+
+      <div class="space-y-4 pt-4 text-xs">
+        
+        <!-- Webhook Directo -->
+        <div class="p-3.5 bg-gray-50 rounded-xl border border-gray-200 space-y-2">
+          <label class="font-bold text-[#0f3042] block">Webhook de Sincronización Automática</label>
+          <p class="text-gray-500 text-[11px]">
+            Ingresa la URL del webhook de <strong>Google Apps Script</strong>, <strong>Zapier</strong> o <strong>Make</strong> para que cada solicitud se inserte automáticamente en tu hoja de Google Sheets.
+          </p>
+          <input type="url" id="config-webhook-url" placeholder="https://script.google.com/macros/s/.../exec" class="form-input text-xs py-2">
+          <div class="flex gap-2 pt-1">
+            <button onclick="testWebhookConnection()" class="px-3 py-1.5 bg-[#0f3042] text-white rounded-lg font-semibold hover:bg-[#163f53]">
+              Probar Conexión
+            </button>
+            <button onclick="saveWebhookConfig()" class="btn-primary py-1.5 px-4 font-semibold">
+              Guardar Webhook
+            </button>
+          </div>
+        </div>
+
+        <!-- Arquitectura Cloud para Archivos de 100MB -->
+        <div class="p-3.5 bg-[#faebee]/50 rounded-xl border border-[#faebee] space-y-2">
+          <strong class="font-bold text-[#0f3042] block">Arquitectura para Archivos Pesados (Hasta 100MB)</strong>
+          <p class="text-gray-600 text-[11px] leading-relaxed">
+            Para soportar brochures y videos de hasta 100MB en producción, la estructura implementa subida directa mediante <strong>Presigned URLs (URLs prefirmadas)</strong> hacia:
+          </p>
+          <ul class="list-disc pl-4 space-y-1 text-gray-600 text-[11px]">
+            <li><strong>AWS S3:</strong> Petición <code class="bg-white px-1 rounded">PUT</code> directa con multipart upload y aceleración de transferencia.</li>
+            <li><strong>Supabase Storage:</strong> Bucket configurado con política pública o autenticada y límite de subida ajustado a 100MB.</li>
+            <li><strong>Firebase Storage:</strong> Integración mediante el SDK modular con reanudación de carga interrumpida.</li>
+          </ul>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. Modal de Conexión Móvil con Link Directo (Android, Apple iPhone, iPad, iMac, PC) -->
+  <div id="modal-mobile-connect" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop animate-fade-in" onclick="closeMobileConnectModal()">
+    <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-gray-200 relative max-h-[92dvh] overflow-y-auto" onclick="event.stopPropagation()">
+      <button onclick="closeMobileConnectModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 p-1" title="Cerrar">
+        <i class="fa-solid fa-xmark text-lg"></i>
+      </button>
+
+      <div class="pb-3 border-b border-gray-100 flex items-center gap-3">
+        <div class="w-10 h-10 rounded-full bg-[#faebee] text-[#d87a86] flex items-center justify-center text-lg flex-shrink-0">
+          <i class="fa-solid fa-link"></i>
+        </div>
+        <div>
+          <h3 class="text-base sm:text-lg font-bold text-[#0f3042]">Link Directo para Celular</h3>
+          <p class="text-xs text-gray-500">Abre con 1 clic en Android, Apple iPhone/iPad, iMac y PC</p>
+        </div>
+      </div>
+
+      <div class="py-4 space-y-4">
+        
+        <!-- Tarjeta Principal de Enlace Directo (Sin requerir código QR) -->
+        <div class="p-4 bg-gradient-to-br from-[#faf7f2] to-[#faebee]/30 rounded-2xl border border-[#ede6de] space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold uppercase tracking-wider text-[#d87a86] flex items-center gap-1.5">
+              <i class="fa-solid fa-globe"></i> Enlace Web Seguro (HTTPS)
+            </span>
+            <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold">
+              ● Enlace Activo
+            </span>
+          </div>
+
+          <p class="text-xs text-gray-700 leading-relaxed">
+            Puedes abrir la página en tu teléfono <strong>tocando el link directo</strong> sin necesidad de escanear ningún código QR:
+          </p>
+
+          <div class="flex items-center gap-2">
+            <input type="text" id="mobile-connect-url-input" readonly value="https://trycloudflare.com" class="form-input text-xs py-2 px-3 bg-white font-mono text-[12px] font-semibold text-[#0f3042] select-all flex-grow shadow-2xs">
+            <button onclick="copyMobileUrl()" class="btn-primary py-2 px-4 text-xs flex-shrink-0 shadow-xs" title="Copiar enlace al portapapeles">
+              <span>Copiar</span>
+            </button>
+          </div>
+
+          <!-- Botones de Acción Rápida -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+            <a id="mobile-direct-link-anchor" href="#" target="_blank" class="py-2 px-3 rounded-xl bg-white hover:bg-gray-50 border border-gray-200 text-xs font-bold text-[#0f3042] text-center flex items-center justify-center gap-1.5 transition-colors shadow-2xs">
+              <i class="fa-solid fa-arrow-up-right-from-square text-[#d87a86]"></i>
+              <span>Abrir en Nueva Pestaña</span>
+            </a>
+            <a id="mobile-whatsapp-share-btn" href="#" target="_blank" class="py-2 px-3 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold text-center flex items-center justify-center gap-1.5 transition-colors shadow-2xs">
+              <i class="fa-brands fa-whatsapp text-sm"></i>
+              <span>Enviar por WhatsApp</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- Compatibilidad Multi-dispositivo -->
+        <div class="space-y-2">
+          <span class="text-[11px] font-bold uppercase tracking-wider text-gray-400 block">
+            Compatibilidad Universal Comprobada
+          </span>
+          <div class="grid grid-cols-2 gap-2 text-xs">
+            <div class="p-2.5 rounded-xl bg-gray-50 border border-gray-200 flex items-center gap-2">
+              <i class="fa-brands fa-apple text-base text-gray-800"></i>
+              <div>
+                <strong class="block text-gray-800 text-[11px]">Apple iOS</strong>
+                <span class="text-[10px] text-gray-500">iPhone, iPad, Safari</span>
+              </div>
+            </div>
+            <div class="p-2.5 rounded-xl bg-gray-50 border border-gray-200 flex items-center gap-2">
+              <i class="fa-brands fa-android text-base text-emerald-600"></i>
+              <div>
+                <strong class="block text-gray-800 text-[11px]">Google Android</strong>
+                <span class="text-[10px] text-gray-500">Samsung, Xiaomi, Chrome</span>
+              </div>
+            </div>
+            <div class="p-2.5 rounded-xl bg-gray-50 border border-gray-200 flex items-center gap-2">
+              <i class="fa-solid fa-desktop text-base text-[#0f3042]"></i>
+              <div>
+                <strong class="block text-gray-800 text-[11px]">iMac & MacBooks</strong>
+                <span class="text-[10px] text-gray-500">Cualquier resolución</span>
+              </div>
+            </div>
+            <div class="p-2.5 rounded-xl bg-gray-50 border border-gray-200 flex items-center gap-2">
+              <i class="fa-brands fa-windows text-base text-blue-500"></i>
+              <div>
+                <strong class="block text-gray-800 text-[11px]">Computadores PC</strong>
+                <span class="text-[10px] text-gray-500">Windows, Linux</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Opción Secundaria: Código QR Opcional -->
+        <details class="group p-3 rounded-xl bg-white border border-gray-200 text-xs">
+          <summary class="cursor-pointer font-semibold text-gray-700 flex items-center justify-between select-none">
+            <span class="flex items-center gap-2">
+              <i class="fa-solid fa-qrcode text-gray-400 group-open:text-[#d87a86]"></i>
+              <span>¿Prefieres escanear con la cámara? (Opcional)</span>
+            </span>
+            <i class="fa-solid fa-chevron-down text-[10px] text-gray-400 transition-transform group-open:rotate-180"></i>
+          </summary>
+          <div class="pt-3 flex flex-col sm:flex-row items-center gap-4 text-center sm:text-left border-t border-gray-100 mt-2.5">
+            <div class="bg-white p-2 rounded-xl shadow-xs border border-gray-200 flex-shrink-0">
+              <img id="mobile-qr-image" src="" alt="Código QR Móvil" class="w-28 h-28 object-contain">
+            </div>
+            <p class="text-[11px] text-gray-500 leading-snug">
+              Si estás frente a la pantalla y prefieres usar la cámara de tu teléfono para abrirlo sin escribir nada, también puedes apuntar a este código QR.
+            </p>
+          </div>
+        </details>
+
+      </div>
+
+      <div class="pt-3 border-t border-gray-100 flex items-center justify-between">
+        <span class="text-[11px] text-gray-400">
+          <i class="fa-solid fa-bolt text-[#d87a86] mr-1"></i> Abre con datos móviles o Wi-Fi
+        </span>
+        <button onclick="closeMobileConnectModal()" class="btn-primary py-2 px-5 text-xs">
+          Listo ✨
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- MODAL DE LA HOJA PROCESADA PARA IMPRESIÓN / PDF / WORD         -->
+  <!-- ============================================================== -->
+  <div id="modal-processed-label" class="hidden fixed inset-0 z-50 overflow-y-auto modal-backdrop p-2 sm:p-6 flex items-start justify-center animate-fade-in">
+    <div class="bg-white rounded-2xl max-w-4xl w-full p-4 sm:p-6 shadow-2xl border border-gray-200 relative my-4 sm:my-8">
+      
+      <!-- Barra Superior de Acciones (No se imprime) -->
+      <div class="no-print pb-4 mb-6 border-b border-gray-200 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-lg bg-[#faebee] text-[#d87a86] flex items-center justify-center font-bold">
+            <i class="fa-solid fa-file-invoice"></i>
+          </div>
+          <div>
+            <h3 class="text-sm sm:text-base font-extrabold text-[#0f3042]">Hoja de Rotulado Procesada</h3>
+            <span class="text-[11px] text-gray-500">Escala oficial para impresión en Hoja Tamaño Carta (8.5" x 11")</span>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2">
+          <!-- Botón Imprimir -->
+          <button onclick="printLabelSheet()" class="px-4 py-2 bg-[#0f3042] hover:bg-[#163f53] text-white rounded-xl text-xs font-bold shadow-xs transition-transform active:scale-95">
+            <span>Imprimir</span>
+          </button>
+
+          <!-- Botón PDF -->
+          <button onclick="exportLabelToPdf()" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs font-bold shadow-xs transition-transform active:scale-95">
+            <span>PDF</span>
+          </button>
+
+          <!-- Botón Word (.docx) -->
+          <button onclick="exportLabelToWord()" class="px-4 py-2 bg-blue-700 hover:bg-blue-800 text-white rounded-xl text-xs font-bold shadow-xs transition-transform active:scale-95">
+            <span>Word</span>
+          </button>
+
+          <!-- Botón Cerrar / Modificar -->
+          <button onclick="closeProcessedLabelModal()" class="px-3.5 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl text-xs font-bold transition-colors">
+            <span>Modificar</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Hoja Física Tamaño Carta (Área de Impresión) -->
+      <div class="overflow-x-auto pb-4">
+        <div id="printable-label-sheet" class="bg-white text-black p-6 sm:p-10 mx-auto border border-gray-300 shadow-md min-w-[650px] max-w-[760px]" style="min-height: 980px;">
+          
+          <!-- Logo intylact y La marca #1 de cuidado íntimo en Venezuela con fondo blanco -->
+          <div class="flex items-center mb-4">
+            <img src="LOGO_BANNER_PRINT.png" alt="INTYLACT - La marca #1 de cuidado íntimo en Venezuela" class="h-10 w-auto object-contain">
+          </div>
+
+          <!-- Tabla Oficial de Rotulado (Bordes Negros Sólidos) -->
+          <table class="label-print-table w-full border-collapse border-[2.5px] border-black text-black">
+            <tbody>
+              <!-- Fila 1: Nombre del Evento -->
+              <tr class="border-b-[2px] border-black">
+                <td class="w-[34%] border-r-[2px] border-black p-3.5 align-top font-black text-xs sm:text-sm uppercase tracking-wider">
+                  NOMBRE DEL EVENTO
+                </td>
+                <td id="pv-event-name" class="w-[66%] p-3.5 align-top font-black text-xs sm:text-sm uppercase leading-snug">
+                  <!-- Rellenado por JS -->
+                </td>
+              </tr>
+
+              <!-- Fila 2: Responsable que Retira -->
+              <tr class="border-b-[2px] border-black">
+                <td class="border-r-[2px] border-black p-3.5 align-top font-black text-xs sm:text-sm uppercase tracking-wider">
+                  RESPONSABLE QUE RETIRA:
+                </td>
+                <td class="p-3.5 align-top">
+                  <div id="pv-responsible-name" class="font-normal text-xs sm:text-sm leading-tight text-gray-900"></div>
+                  <div id="pv-responsible-id" class="font-bold text-xs sm:text-sm mt-1.5 font-mono text-black"></div>
+                </td>
+              </tr>
+
+              <!-- Fila 3: Teléfono -->
+              <tr class="border-b-[2px] border-black">
+                <td class="border-r-[2px] border-black p-3.5 align-top font-black text-xs sm:text-sm uppercase tracking-wider">
+                  TELÉFONO:
+                </td>
+                <td id="pv-phone" class="p-3.5 align-top font-bold text-xs sm:text-sm tracking-wide">
+                  <!-- Rellenado por JS -->
+                </td>
+              </tr>
+
+              <!-- Fila 4: Dirección -->
+              <tr class="border-b-[2px] border-black">
+                <td class="border-r-[2px] border-black p-3.5 align-top font-black text-xs sm:text-sm uppercase tracking-wider">
+                  DIRECCION:
+                </td>
+                <td id="pv-address" class="p-3.5 align-top font-bold text-xs uppercase leading-relaxed">
+                  <!-- Rellenado por JS -->
+                </td>
+              </tr>
+
+              <!-- Fila 5: Productos en Esta Caja -->
+              <tr class="border-b-[2px] border-black">
+                <td class="border-r-[2px] border-black p-3.5 align-top font-black text-xs sm:text-sm uppercase tracking-wider">
+                  PRODUCTOS EN ESTA CAJA:
+                </td>
+                <td class="p-3.5 align-top">
+                  <!-- CAJA EN LETRA GRANDE MODIFICABLE -->
+                  <div id="pv-box-label" class="text-3xl sm:text-4xl font-black uppercase tracking-tight text-black mb-2" style="font-size: 32px; line-height: 1.1;">
+                    CAJA 1/1
+                  </div>
+                  <div id="pv-box-subtitle" class="font-bold text-xs sm:text-sm uppercase tracking-wider text-gray-800 mb-3">
+                    REGALOS EN STAND
+                  </div>
+                  <ul id="pv-products-list" class="list-disc pl-6 space-y-1.5 text-xs font-bold uppercase text-black leading-snug">
+                    <!-- Rellenado por JS -->
+                  </ul>
+                </td>
+              </tr>
+
+              <!-- Fila 6: Nota Importante -->
+              <tr>
+                <td class="border-r-[2px] border-black p-3.5 align-top font-black text-xs sm:text-sm uppercase tracking-wider">
+                  NOTA IMPORTANTE:
+                </td>
+                <td id="pv-note" class="p-3.5 align-top font-black text-xs uppercase leading-snug text-black">
+                  POR FAVOR AL RETIRAR ESTE PAQUETE, NOTIFICAR AL EQUIPO DE RELACIONES PÚBLICAS
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- MODAL DE GUÍA / EJEMPLO MODELO (SOLO PARA ESTA SECCIÓN)        -->
+  <!-- ============================================================== -->
+  <div id="modal-label-guide" class="hidden fixed inset-0 z-50 overflow-y-auto modal-backdrop p-4 flex items-center justify-center animate-fade-in">
+    <div class="bg-white rounded-2xl max-w-lg w-full p-5 shadow-2xl border border-gray-200 relative">
+      <div class="flex items-center justify-between pb-3 mb-3 border-b border-gray-200">
+        <div class="flex items-center gap-2">
+          <i class="fa-solid fa-image text-[#d87a86]"></i>
+          <h3 class="text-sm font-bold text-[#0f3042]">Formato Modelo de Referencia</h3>
+        </div>
+        <button onclick="closeLabelGuideModal()" class="text-gray-400 hover:text-gray-600 p-1">
+          <i class="fa-solid fa-xmark text-base"></i>
+        </button>
+      </div>
+
+      <div class="bg-gray-50 p-2 rounded-xl border border-gray-200 max-h-[70vh] overflow-y-auto">
+        <img src="etiquetado.jpeg" alt="Ejemplo de Rotulado de Caja INTYLACT" class="w-full rounded-lg shadow-sm">
+      </div>
+
+      <div class="pt-3 mt-3 border-t border-gray-200 flex items-center justify-between">
+        <button onclick="loadModelFuccamExample(); closeLabelGuideModal();" class="text-xs font-bold text-[#d87a86] hover:underline">
+          <span>Cargar estos datos en el formulario</span>
+        </button>
+        <button onclick="closeLabelGuideModal()" class="btn-primary py-1.5 px-4 text-xs font-bold">
+          Entendido
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contenedor Flotante de Toast Notifications -->
+  <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 max-w-sm pointer-events-none">
+    <!-- Generado dinámicamente -->
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- LISTAS DE AUTOCOMPLETADO PREDETERMINADO (DATALISTS OFICIALES)  -->
+  <!-- ============================================================== -->
+  <!-- 1. Correos Administradores Autorizados -->
+  <datalist id="datalist-admin-emails">
+    <option value="samivivasintyeventos@intylact.com">Sami Vivas (Administrador INTYLACT)</option>
+    <option value="dixonmontillaintyeventos@intylact.com">Dixon Montilla (Administrador INTYLACT)</option>
+    <option value="intyeventos@intylact.com">Dirección de Mercadeo INTYLACT</option>
+  </datalist>
+
+  <!-- 2. Correos Google Predeterminados -->
+  <datalist id="datalist-google-emails">
+    <option value="samivivasintyeventos@intylact.com">Sami Vivas</option>
+    <option value="dixonmontillaintyeventos@intylact.com">Dixon Montilla</option>
+    <option value="intyeventos@intylact.com">Dirección de Mercadeo INTYLACT</option>
+    <option value="valerialeones@gmail.com">Valeria Leones (Fuccam)</option>
+    <option value="sportfit.venezuela@gmail.com">SportFit Venezuela C.A.</option>
+  </datalist>
+
+  <!-- 3. Nombres Predeterminados -->
+  <datalist id="datalist-names">
+    <option value="Sami Vivas">Sami Vivas</option>
+    <option value="Dixon Montilla">Dixon Montilla</option>
+    <option value="Valeria Leones">Valeria Leones</option>
+    <option value="SportFit Venezuela C.A.">SportFit Venezuela C.A.</option>
+    <option value="Fundación Concientización Cáncer de Mama FUCCAM">FUCCAM</option>
+  </datalist>
+
+  <!-- 4. Cédulas / Identificaciones -->
+  <datalist id="datalist-cedulas">
+    <option value="V- 32196229">V- 32196229 (Valeria Leones)</option>
+    <option value="V- 12345678">V- 12345678</option>
+    <option value="V- 28456123">V- 28456123</option>
+    <option value="V- 30124567">V- 30124567</option>
+    <option value="J- 50123456-7">J- 50123456-7 (Rif Jurídico)</option>
+    <option value="E- 84123456">E- 84123456 (Extranjero)</option>
+  </datalist>
+
+  <!-- 5. Teléfonos / WhatsApp -->
+  <datalist id="datalist-phones">
+    <option value="04126681611">04126681611 (Valeria Leones)</option>
+    <option value="0412 1234567">0412 (Digitel)</option>
+    <option value="0414 1234567">0414 (Movistar)</option>
+    <option value="0424 1234567">0424 (Movistar)</option>
+    <option value="0416 1234567">0416 (Movilnet)</option>
+    <option value="0426 1234567">0426 (Movilnet)</option>
+    <option value="+58 412 6681611">+58 412 6681611 (Internacional)</option>
+  </datalist>
+
+  <!-- 6. Nombres de Eventos -->
+  <datalist id="datalist-events">
+    <option value="6TA EDICION CARRERA CAMINATA 5K POR LA CONCIENTIZACION DEL CANCER DE MAMA FUCCAM 25 DE OCTUBRE | MATERIAL PROMOTORA VALERIA LEONES PUEBLO NUEVO">Carrera Caminata 5K FUCCAM</option>
+    <option value="Masterclass de Yoga & Cuidado Íntimo INTYLACT 2026">Masterclass de Yoga</option>
+    <option value="Torneo Femenino Intysquad & Bienestar 2026">Torneo Femenino Intysquad</option>
+    <option value="Jornada de Salud Femenina & Autocuidado INTYLACT">Jornada de Salud</option>
+    <option value="Activación Deportiva y Bienestar Femenino">Activación Deportiva</option>
+  </datalist>
+
+  <!-- 7. Ubicaciones y Direcciones -->
+  <datalist id="datalist-locations">
+    <option value="GUACUIRA ARRIBA, MUNICIPIO FALCÓN. ESTADO FALCÓN, DETRÁS DE LA PARADA, CASA SIN NÚMERO">Guacuira Arriba, Estado Falcón</option>
+    <option value="Caracas, Miranda - Canchas La Guairita">Caracas - Canchas La Guairita</option>
+    <option value="Caracas, Distrito Capital - Parque del Este">Caracas - Parque del Este</option>
+    <option value="Valencia, Carabobo - Hotel Hesperia WTC">Valencia - Hotel Hesperia WTC</option>
+    <option value="Maracaibo, Zulia - Vereda del Lago">Maracaibo - Vereda del Lago</option>
+    <option value="Barquisimeto, Lara - Complejo Ferial">Barquisimeto - Complejo Ferial</option>
+    <option value="Lechería, Anzoátegui - Plaza Mayor">Lechería - Plaza Mayor</option>
+    <option value="San Cristóbal, Táchira - Parque Metropolitano">San Cristóbal - Parque Metropolitano</option>
+  </datalist>
+
+  <!-- 8. Números de Cajas y Totales -->
+  <datalist id="datalist-box-counts">
+    <option value="1">1 Caja</option>
+    <option value="2">2 Cajas</option>
+    <option value="3">3 Cajas</option>
+    <option value="4">4 Cajas</option>
+    <option value="5">5 Cajas</option>
+    <option value="6">6 Cajas</option>
+    <option value="7">7 Cajas</option>
+    <option value="8">8 Cajas</option>
+    <option value="9">9 Cajas</option>
+    <option value="10">10 Cajas</option>
+  </datalist>
+
+  <!-- 9. Subtítulos de Cajas -->
+  <datalist id="datalist-box-subtitles">
+    <option value="REGALOS EN STAND">REGALOS EN STAND</option>
+    <option value="MATERIAL PROMOTORA">MATERIAL PROMOTORA</option>
+    <option value="UNIFORMES Y ACCESORIOS">UNIFORMES Y ACCESORIOS</option>
+    <option value="MUESTRAS Y SACHETS">MUESTRAS Y SACHETS</option>
+    <option value="EQUIPO DE SONIDO E ILUMINACIÓN">EQUIPO DE SONIDO E ILUMINACIÓN</option>
+    <option value="STAND Y BANDERINES">STAND Y BANDERINES</option>
+    <option value="BOTARGA Y PUBLICIDAD">BOTARGA Y PUBLICIDAD</option>
+  </datalist>
+
+  <!-- 10. Instagram Handles -->
+  <datalist id="datalist-instagram">
+    <option value="@intylact">@intylact</option>
+    <option value="@intysquad">@intysquad</option>
+    <option value="@fuccam_oficial">@fuccam_oficial</option>
+    <option value="@bienestar_femenino">@bienestar_femenino</option>
+    <option value="@sportfit_vzla">@sportfit_vzla</option>
+  </datalist>
+
+  <!-- Scripts de la Aplicación -->
+  <script src="app.js"></script>
+</body>
+</html>
