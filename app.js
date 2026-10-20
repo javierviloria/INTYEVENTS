@@ -237,88 +237,56 @@ function initUniversalAutocomplete() {
       });
     }
 
-    // 2. Correos Google / Organizador
-    if (id === 'google-custom-email' || id === 'form-org-email' || listAttr === 'datalist-google-emails') {
-      getDeviceAccounts().forEach(a => {
-        suggestions.push({ value: a.email, badge: 'Guardado', label: `${a.name} - ${a.email}` });
-      });
-      getLeads().forEach(l => {
-        if (!suggestions.some(s => s.value.toLowerCase() === l.email.toLowerCase())) {
-          suggestions.push({ value: l.email, badge: 'Lead', label: `${l.name} - ${l.email}` });
-        }
-      });
-      getRequests().forEach(r => {
-        const em = r.organizer?.email;
-        if (em && !suggestions.some(s => s.value.toLowerCase() === em.toLowerCase())) {
-          suggestions.push({ value: em, badge: 'Evento', label: `${r.organizer?.name || 'Organizador'} - ${em}` });
-        }
-      });
-      AUTHORIZED_ADMIN_ACCOUNTS.forEach(a => {
-        if (!suggestions.some(s => s.value.toLowerCase() === a.email.toLowerCase())) {
-          suggestions.push({ value: a.email, badge: 'Admin', label: a.email });
-        }
-      });
+    // 2. Correos Google / Organizador (Estricta Privacidad del Usuario)
+    if (id === 'google-custom-email' || id === 'form-org-email') {
+      // Sugerir únicamente el correo propio del usuario autenticado si existe
+      if (AppState.currentUser && AppState.currentUser.email) {
+        suggestions.push({ value: AppState.currentUser.email, badge: 'Tu Correo', label: AppState.currentUser.email });
+      }
+      // Autocompletado sintáctico de dominio seguro al escribir letras
       if (val && !val.includes('@') && val.length >= 2) {
         suggestions.push({ value: `${val}@gmail.com`, badge: 'Gmail', label: `${val}@gmail.com` });
         suggestions.push({ value: `${val}@hotmail.com`, badge: 'Hotmail', label: `${val}@hotmail.com` });
-        suggestions.push({ value: `${val}@intylact.com`, badge: 'Intylact', label: `${val}@intylact.com` });
+        suggestions.push({ value: `${val}@yahoo.com`, badge: 'Yahoo', label: `${val}@yahoo.com` });
       }
     }
 
-    // 3. Nombres (Google, Organizador, Responsable)
-    if (id === 'google-custom-name' || id === 'form-org-name' || id === 'label-input-responsible-name' || listAttr === 'datalist-names') {
-      AUTHORIZED_ADMIN_ACCOUNTS.forEach(a => suggestions.push({ value: a.name, badge: 'Admin', label: a.name }));
-      getDeviceAccounts().forEach(a => {
-        if (!suggestions.some(s => s.value.toLowerCase() === a.name.toLowerCase())) {
-          suggestions.push({ value: a.name, badge: 'Guardado', label: a.name });
-        }
-      });
-      getLeads().forEach(l => {
-        if (l.name && !suggestions.some(s => s.value.toLowerCase() === l.name.toLowerCase())) {
-          suggestions.push({ value: l.name, badge: 'Lead', label: l.name });
-        }
-      });
+    // 3. Nombres (Privacidad: solo el usuario actual o responsable en etiquetado)
+    if (id === 'google-custom-name' || id === 'form-org-name') {
+      if (AppState.currentUser && AppState.currentUser.name) {
+        suggestions.push({ value: AppState.currentUser.name, badge: 'Tu Nombre', label: AppState.currentUser.name });
+      }
+    } else if (id === 'label-input-responsible-name' || id === 'logistics-input-responsible-name') {
+      // Solo en administración (Logística / Etiquetado)
       getRequests().forEach(r => {
         const nm = r.organizer?.name;
         if (nm && !suggestions.some(s => s.value.toLowerCase() === nm.toLowerCase())) {
           suggestions.push({ value: nm, badge: 'Evento', label: nm });
         }
       });
-      suggestions.push({ value: 'Valeria Leones', badge: 'Referencia', label: 'Valeria Leones' });
-      suggestions.push({ value: 'SportFit Venezuela C.A.', badge: 'Empresa', label: 'SportFit Venezuela C.A.' });
     }
 
     // 4. Cédula / Identificación
     if (id === 'form-org-id-document' || id === 'label-input-responsible-id' || listAttr === 'datalist-cedulas') {
-      suggestions.push({ value: 'V- 32196229', badge: 'Cédula', label: 'V- 32196229 (Valeria Leones)' });
-      suggestions.push({ value: 'V- 12345678', badge: 'Cédula', label: 'V- 12345678' });
-      suggestions.push({ value: 'V- 28456123', badge: 'Cédula', label: 'V- 28456123' });
-      suggestions.push({ value: 'V- 30124567', badge: 'Cédula', label: 'V- 30124567' });
-      suggestions.push({ value: 'J- 50123456-7', badge: 'RIF', label: 'J- 50123456-7 (Rif Jurídico)' });
-      suggestions.push({ value: 'E- 84123456', badge: 'Extranjero', label: 'E- 84123456' });
-      getRequests().forEach(r => {
-        const doc = r.organizer?.idDocument;
-        if (doc && !suggestions.some(s => s.value.toLowerCase() === doc.toLowerCase())) {
-          suggestions.push({ value: doc, badge: 'Historial', label: `${doc} (${r.organizer?.name || 'Organizador'})` });
-        }
-      });
+      if (AppState.currentUser && AppState.currentUser.idDocument) {
+        suggestions.push({ value: AppState.currentUser.idDocument, badge: 'Tu Cédula', label: AppState.currentUser.idDocument });
+      }
+      suggestions.push({ value: 'V- ', badge: 'Venezolano', label: 'V- (Cédula Venezolana)' });
+      suggestions.push({ value: 'J- ', badge: 'Jurídico', label: 'J- (Rif Jurídico)' });
+      suggestions.push({ value: 'E- ', badge: 'Extranjero', label: 'E- (Extranjero)' });
     }
 
-    // 5. Teléfonos / WhatsApp
+    // 5. Teléfonos / WhatsApp (Privacidad del usuario)
     if (id === 'form-org-whatsapp' || id === 'label-input-phone' || listAttr === 'datalist-phones') {
-      suggestions.push({ value: '04126681611', badge: 'Digitel', label: '04126681611 (Valeria Leones)' });
-      suggestions.push({ value: '0412 1234567', badge: 'Digitel', label: '0412 1234567' });
-      suggestions.push({ value: '0414 1234567', badge: 'Movistar', label: '0414 1234567' });
-      suggestions.push({ value: '0424 1234567', badge: 'Movistar', label: '0424 1234567' });
-      suggestions.push({ value: '0416 1234567', badge: 'Movilnet', label: '0416 1234567' });
-      suggestions.push({ value: '0426 1234567', badge: 'Movilnet', label: '0426 1234567' });
-      suggestions.push({ value: '+58 412 6681611', badge: 'Internacional', label: '+58 412 6681611' });
-      getRequests().forEach(r => {
-        const ph = r.organizer?.whatsapp;
-        if (ph && !suggestions.some(s => s.value.toLowerCase() === ph.toLowerCase())) {
-          suggestions.push({ value: ph, badge: 'Historial', label: `${ph} (${r.organizer?.name || ''})` });
-        }
-      });
+      if (AppState.currentUser && AppState.currentUser.phone) {
+        suggestions.push({ value: AppState.currentUser.phone, badge: 'Tu Teléfono', label: AppState.currentUser.phone });
+      }
+      suggestions.push({ value: '0412 ', badge: 'Digitel', label: '0412 (Digitel)' });
+      suggestions.push({ value: '0414 ', badge: 'Movistar', label: '0414 (Movistar)' });
+      suggestions.push({ value: '0424 ', badge: 'Movistar', label: '0424 (Movistar)' });
+      suggestions.push({ value: '0416 ', badge: 'Movilnet', label: '0416 (Movilnet)' });
+      suggestions.push({ value: '0426 ', badge: 'Movilnet', label: '0426 (Movilnet)' });
+      suggestions.push({ value: '+58 ', badge: 'Internacional', label: '+58 (Venezuela)' });
     }
 
     // 6. Nombres de Eventos
@@ -866,36 +834,15 @@ function updateDashboardTabs(activeTab) {
 // Regla: No mostrar correos de otros usuarios a menos que hayan iniciado sesión en este equipo
 
 function getDeviceAccounts() {
-  try {
-    const raw = localStorage.getItem(INTY_STORAGE_KEYS.DEVICE_ACCOUNTS);
-    if (!raw) return [];
-    const accounts = JSON.parse(raw);
-    return Array.isArray(accounts) ? accounts : [];
-  } catch (e) {
-    return [];
-  }
+  // Privacidad estricta: No exponer cuentas previas en pantallas compartidas
+  return [];
 }
 
 function saveDeviceAccount(profile) {
-  if (!profile || !profile.email) return;
-  let accounts = getDeviceAccounts();
-  const emailNorm = profile.email.trim().toLowerCase();
-  const existingIdx = accounts.findIndex(a => a.email.toLowerCase() === emailNorm);
-  
-  const entry = {
-    id: profile.id || ('lead-' + Date.now()),
-    name: profile.name,
-    email: emailNorm,
-    photo: profile.photo || `https://ui-avatars.com/api/?name=${encodeURIComponent(profile.name)}&background=d87a86&color=fff&bold=true`,
-    lastLogin: new Date().toISOString()
-  };
-
-  if (existingIdx >= 0) {
-    accounts[existingIdx] = entry;
-  } else {
-    accounts.unshift(entry);
-  }
-  localStorage.setItem(INTY_STORAGE_KEYS.DEVICE_ACCOUNTS, JSON.stringify(accounts));
+  // Privacidad estricta: No almacenar listas públicas de cuentas en este dispositivo
+  try {
+    localStorage.removeItem(INTY_STORAGE_KEYS.DEVICE_ACCOUNTS);
+  } catch (e) {}
 }
 
 function removeSavedDeviceAccount(event, email) {
@@ -903,11 +850,14 @@ function removeSavedDeviceAccount(event, email) {
     event.stopPropagation();
     event.preventDefault();
   }
-  let accounts = getDeviceAccounts();
-  accounts = accounts.filter(a => a.email.toLowerCase() !== email.toLowerCase());
-  localStorage.setItem(INTY_STORAGE_KEYS.DEVICE_ACCOUNTS, JSON.stringify(accounts));
+  try {
+    localStorage.removeItem(INTY_STORAGE_KEYS.DEVICE_ACCOUNTS);
+    if (email) {
+      localStorage.removeItem('inty_user_profile_' + email.trim().toLowerCase());
+    }
+  } catch (e) {}
   renderDeviceSavedAccounts();
-  showToast('Cuenta removida de este equipo.', 'info');
+  showToast('Datos de sesión limpiados con éxito.', 'info');
 }
 
 // ==========================================================================
@@ -1059,49 +1009,20 @@ function loginWithSavedDeviceAccount(email) {
 }
 
 function renderDeviceSavedAccounts() {
-  const accounts = getDeviceAccounts();
-  
+  // Privacidad estricta: No exponer cuentas ni datos de otros usuarios
+  try {
+    localStorage.removeItem(INTY_STORAGE_KEYS.DEVICE_ACCOUNTS);
+  } catch (e) {}
+
   const landingBox = document.getElementById('device-saved-accounts-box');
   const landingList = document.getElementById('device-saved-accounts-list');
   const modalBox = document.getElementById('modal-saved-accounts-container');
   const modalList = document.getElementById('modal-saved-accounts-list');
 
-  // Si no hay cuentas guardadas en este equipo, OCULTAR completamente ambos contenedores
-  // Ningún correo externo o simulado debe ser visible para un usuario nuevo
-  if (accounts.length === 0) {
-    if (landingBox) landingBox.classList.add('hidden');
-    if (landingList) landingList.innerHTML = '';
-    if (modalBox) modalBox.classList.add('hidden');
-    if (modalList) modalList.innerHTML = '';
-    return;
-  }
-
-  // Generar tarjetas de selección rápida para cuentas locales
-  const itemsHtml = accounts.map(acc => `
-    <div class="flex items-center justify-between p-2.5 rounded-xl bg-white border border-[#ede6de] hover:border-[#d87a86] transition-colors cursor-pointer group shadow-2xs hover:shadow-xs" onclick="loginWithSavedDeviceAccount('${acc.email}')">
-      <div class="flex items-center gap-2.5 overflow-hidden">
-        <img src="${acc.photo}" alt="${acc.name}" class="w-8 h-8 rounded-full object-cover border border-[#d87a86] flex-shrink-0">
-        <div class="text-left truncate">
-          <p class="text-xs font-bold text-[#0f3042] group-hover:text-[#d87a86] transition-colors truncate leading-tight">${acc.name}</p>
-          <p class="text-[11px] text-gray-500 truncate leading-none mt-0.5">${acc.email}</p>
-        </div>
-      </div>
-      <div class="flex items-center gap-1.5 flex-shrink-0 ml-2">
-        <span class="text-[10px] text-[#d87a86] font-semibold bg-[#faebee] px-2.5 py-0.5 rounded-full group-hover:bg-[#d87a86] group-hover:text-white transition-colors">
-          Ingresar
-        </span>
-        <button type="button" onclick="removeSavedDeviceAccount(event, '${acc.email}')" title="Eliminar cuenta de este equipo" class="text-gray-400 hover:text-red-500 p-1 text-xs transition-colors">
-          <i class="fa-solid fa-trash-can"></i>
-        </button>
-      </div>
-    </div>
-  `).join('');
-
-  if (landingBox) landingBox.classList.remove('hidden');
-  if (landingList) landingList.innerHTML = itemsHtml;
-
-  if (modalBox) modalBox.classList.remove('hidden');
-  if (modalList) modalList.innerHTML = itemsHtml;
+  if (landingBox) landingBox.classList.add('hidden');
+  if (landingList) landingList.innerHTML = '';
+  if (modalBox) modalBox.classList.add('hidden');
+  if (modalList) modalList.innerHTML = '';
 }
 
 // --- FORMULARIO DIRECTO EN LANDING PAGE (CON AUTORRELLENO) ---
@@ -1251,6 +1172,15 @@ function openGoogleLoginModal() {
   const modal = document.getElementById('modal-google-auth');
   renderDeviceSavedAccounts();
   if (modal) modal.classList.remove('hidden');
+  const emailInput = document.getElementById('google-custom-email');
+  const nameInput = document.getElementById('google-custom-name');
+  if (emailInput) {
+    emailInput.value = '';
+    setTimeout(() => {
+      try { emailInput.focus(); } catch (e) {}
+    }, 120);
+  }
+  if (nameInput) nameInput.value = '';
 }
 
 function closeGoogleLoginModal() {

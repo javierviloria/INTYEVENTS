@@ -516,19 +516,23 @@ body {
   -webkit-overflow-scrolling: touch;
 }
 
-/* Optimización de botones y controles táctiles */
+/* Optimización de botones y controles táctiles para Android, iPhone (iOS), Tablets y Laptops */
 @media (max-width: 640px) {
   .btn-primary,
   .btn-secondary,
   .btn-google {
-    min-height: 48px;
-    padding-left: 1.25rem;
-    padding-right: 1.25rem;
+    min-height: 44px;
     touch-action: manipulation;
   }
 
+  .btn-primary:not([class*="px-"]),
+  .btn-secondary:not([class*="px-"]) {
+    padding-left: 0.875rem;
+    padding-right: 0.875rem;
+  }
+
   .form-input {
-    padding: 0.85rem 0.95rem;
+    padding: 0.75rem 0.85rem;
   }
 
   /* Stepper en pantallas pequeñas */
@@ -538,7 +542,13 @@ body {
     font-size: 0.85rem;
   }
 
-  /* Modales optimizados para pantalla completa o bottom sheet en celular */
+  /* Modales optimizados para pantalla completa o bottom sheet en celular sin cortes */
+  .modal-backdrop > div {
+    max-height: calc(100dvh - 2rem) !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
   .modal-sheet-mobile {
     max-height: 92dvh !important;
     border-bottom-left-radius: 0 !important;
@@ -553,12 +563,14 @@ body {
   left: 0;
   right: 0;
   z-index: 45;
-  background: rgba(255, 255, 255, 0.96);
+  background: rgba(255, 255, 255, 0.98);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border-top: 1px solid var(--inty-border);
-  padding-top: 0.5rem;
-  padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+  padding-top: 0.4rem;
+  padding-bottom: max(0.4rem, env(safe-area-inset-bottom));
+  padding-left: max(0.5rem, env(safe-area-inset-left));
+  padding-right: max(0.5rem, env(safe-area-inset-right));
   box-shadow: 0 -4px 20px rgba(15, 48, 66, 0.08);
 }
 
@@ -582,9 +594,9 @@ img {
 
 /* 1. BANNERS INSTITUCIONALES (LOGO_TRANSPARENT.png) */
 .banner-nav {
-  height: 2.6rem; /* ~42px en teléfonos */
+  height: 2.15rem; /* ~34px en teléfonos */
   width: auto;
-  max-width: 230px;
+  max-width: 155px;
   object-fit: contain;
   background: transparent !important;
   border: none !important;
@@ -593,8 +605,8 @@ img {
 }
 @media (min-width: 480px) {
   .banner-nav {
-    height: 2.85rem; /* ~46px */
-    max-width: 250px;
+    height: 2.6rem; /* ~42px */
+    max-width: 220px;
   }
 }
 @media (min-width: 768px) {

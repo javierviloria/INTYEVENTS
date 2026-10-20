@@ -113,21 +113,22 @@
         <!-- Controles de Usuario y Acciones -->
         <div class="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
           
-          <!-- Botón de Conexión Móvil con Link Directo (Solo texto, sin icono) -->
-          <button onclick="openMobileConnectModal()" class="text-xs font-semibold text-[#0f3042] bg-[#faf7f2] hover:bg-[#faebee] border border-[#ede6de] px-2.5 py-1.5 rounded-lg transition-colors shadow-2xs whitespace-nowrap" title="Abrir con Link Directo en celular Android o Apple iPhone">
+          <!-- Botón de Conexión Móvil con Link Directo (Visible en PC y Tablets, oculto en celulares donde ya se navega) -->
+          <button onclick="openMobileConnectModal()" class="hidden sm:inline-flex text-xs font-semibold text-[#0f3042] bg-[#faf7f2] hover:bg-[#faebee] border border-[#ede6de] px-2.5 py-1.5 rounded-lg transition-colors shadow-2xs whitespace-nowrap" title="Abrir con Link Directo en celular Android o Apple iPhone">
             <span class="inline">Link Celular</span>
           </button>
 
-          <!-- Botón de Acceso Admin si está en Landing (Solo texto, sin icono) -->
+          <!-- Botón de Acceso Admin si está en Landing (Solo texto, sin icono, adaptado a móviles) -->
           <div id="nav-landing-actions">
-            <button onclick="openAdminLoginModal()" class="text-xs font-semibold text-[#0f3042] bg-[#faebee] hover:bg-[#f4d3d8] px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap">
-              <span>Acceso Administrador</span>
+            <button onclick="openAdminLoginModal()" class="text-xs font-semibold text-[#0f3042] bg-[#faebee] hover:bg-[#f4d3d8] px-2.5 sm:px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap">
+              <span class="sm:hidden">Admin</span>
+              <span class="hidden sm:inline">Acceso Administrador</span>
             </button>
           </div>
 
-          <!-- Perfil de Usuario Logueado con Botón Cerrar Sesión -->
+          <!-- Perfil de Usuario Logueado con Botón Cerrar Sesión (Adaptable a celulares) -->
           <div id="nav-user-profile" class="hidden flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
-            <div class="flex items-center gap-1.5 sm:gap-2 bg-gray-50 border border-gray-200 py-1 px-2 sm:px-2.5 rounded-full max-w-[150px] sm:max-w-[200px]">
+            <div class="flex items-center gap-1.5 sm:gap-2 bg-gray-50 border border-gray-200 py-1 px-1.5 sm:px-2.5 rounded-full max-w-[110px] sm:max-w-[200px]">
               <img id="nav-user-avatar" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100" alt="Avatar" class="w-6 h-6 sm:w-7 sm:h-7 rounded-full object-cover border border-[#d87a86] shrink-0">
               <div class="text-left pr-1 min-w-0">
                 <span id="nav-user-name" class="block text-xs font-bold text-[#0f3042] leading-tight truncate">Usuario</span>
@@ -135,9 +136,10 @@
               </div>
             </div>
 
-            <!-- Botón Cerrar Sesión Visible (Solo texto, sin icono) -->
-            <button onclick="logout()" class="text-xs font-bold text-rose-600 bg-rose-50 hover:bg-rose-100 border border-rose-200 px-3 py-1.5 rounded-xl transition-all shadow-2xs cursor-pointer active:scale-95 whitespace-nowrap shrink-0" title="Cerrar sesión">
-              <span>Cerrar sesión</span>
+            <!-- Botón Cerrar Sesión Visible (Solo texto, sin icono, adaptado a móviles) -->
+            <button onclick="logout()" class="text-xs font-bold text-rose-600 bg-rose-50 hover:bg-rose-100 border border-rose-200 px-2 sm:px-3 py-1.5 rounded-xl transition-all shadow-2xs cursor-pointer active:scale-95 whitespace-nowrap shrink-0" title="Cerrar sesión">
+              <span class="sm:hidden">Salir</span>
+              <span class="hidden sm:inline">Cerrar sesión</span>
             </button>
           </div>
 
@@ -147,21 +149,21 @@
     </div>
 
     <!-- Pestañas Móviles Inferiores Acopladas (Estilo App Nativa Android / Apple iOS) -->
-    <nav id="mobile-user-tabs" style="display: none;" class="hidden md:hidden mobile-bottom-bar px-4 py-1.5 flex items-center justify-around text-xs shadow-lg">
-      <button id="mobile-tab-btn-events" onclick="navigateTo('dashboard-events')" class="font-bold text-[#d87a86] py-1 px-3 transition-transform active:scale-95 text-center">
-        <span class="text-xs">Eventos</span>
+    <nav id="mobile-user-tabs" style="display: none;" class="hidden md:hidden mobile-bottom-bar px-1 sm:px-4 py-1.5 flex items-center justify-around text-xs shadow-lg">
+      <button id="mobile-tab-btn-events" onclick="navigateTo('dashboard-events')" class="font-bold text-[#d87a86] py-1 px-1 sm:px-2 transition-transform active:scale-95 text-center flex-1 truncate">
+        <span class="text-[11px] sm:text-xs">Eventos</span>
       </button>
-      <button id="mobile-tab-btn-wizard" onclick="navigateTo('dashboard-wizard')" class="font-medium text-gray-500 py-1 px-3 transition-transform active:scale-95 text-center">
-        <span class="text-xs">Solicitud</span>
+      <button id="mobile-tab-btn-wizard" onclick="navigateTo('dashboard-wizard')" class="font-medium text-gray-500 py-1 px-1 sm:px-2 transition-transform active:scale-95 text-center flex-1 truncate">
+        <span class="text-[11px] sm:text-xs">Solicitud</span>
       </button>
-      <button id="mobile-tab-btn-admin" style="display: none;" onclick="navigateTo('admin')" class="hidden font-medium text-gray-500 py-1 px-3 transition-transform active:scale-95 text-center">
-        <span class="text-xs">Resultados</span>
+      <button id="mobile-tab-btn-admin" style="display: none;" onclick="navigateTo('admin')" class="hidden font-medium text-gray-500 py-1 px-1 sm:px-2 transition-transform active:scale-95 text-center flex-1 truncate">
+        <span class="text-[11px] sm:text-xs">Resultados</span>
       </button>
-      <button id="mobile-tab-btn-logistics" style="display: none;" onclick="navigateTo('logistics')" class="hidden font-medium text-gray-500 py-1 px-3 transition-transform active:scale-95 text-center">
-        <span class="text-xs">Logística</span>
+      <button id="mobile-tab-btn-logistics" style="display: none;" onclick="navigateTo('logistics')" class="hidden font-medium text-gray-500 py-1 px-1 sm:px-2 transition-transform active:scale-95 text-center flex-1 truncate">
+        <span class="text-[11px] sm:text-xs">Logística</span>
       </button>
-      <button id="mobile-tab-btn-labeling" style="display: none;" onclick="navigateTo('labeling')" class="hidden font-medium text-gray-500 py-1 px-3 transition-transform active:scale-95 text-center">
-        <span class="text-xs">Etiquetado</span>
+      <button id="mobile-tab-btn-labeling" style="display: none;" onclick="navigateTo('labeling')" class="hidden font-medium text-gray-500 py-1 px-1 sm:px-2 transition-transform active:scale-95 text-center flex-1 truncate">
+        <span class="text-[11px] sm:text-xs">Etiquetado</span>
       </button>
     </nav>
   </header>
@@ -664,7 +666,7 @@
                     <label class="form-label">
                       Nombre y Apellido del Responsable o Empresa <span class="req">*</span>
                     </label>
-                    <input type="text" id="form-org-name" list="datalist-names" autocomplete="name" oninput="validateCurrentStep()" placeholder="Ej. Valeria Morales Rivas / SportFit Venezuela C.A." class="form-input">
+                    <input type="text" id="form-org-name" autocomplete="name" oninput="validateCurrentStep()" placeholder="Ej. Valeria Morales Rivas / SportFit Venezuela C.A." class="form-input">
                   </div>
                   <div>
                     <label class="form-label">
@@ -679,7 +681,7 @@
                     <label class="form-label">
                       Correo Electrónico de Contacto <span class="req">*</span>
                     </label>
-                    <input type="email" id="form-org-email" list="datalist-google-emails" inputmode="email" autocomplete="email" oninput="validateCurrentStep()" placeholder="ejemplo@correo.com" class="form-input">
+                    <input type="email" id="form-org-email" inputmode="email" autocomplete="email" oninput="validateCurrentStep()" placeholder="ejemplo@correo.com" class="form-input">
                   </div>
                   <div>
                     <label class="form-label">
@@ -1076,6 +1078,7 @@
           </p>
         </div>
 
+        <div class="flex items-center gap-2 flex-wrap">
           <!-- Acceso a Etiquetado de Cajas -->
           <button onclick="navigateTo('labeling')" class="px-4 py-2.5 bg-[#0f3042] hover:bg-[#163f53] text-white rounded-xl text-xs font-bold shadow-sm transition-all">
             <span>Etiquetado de Cajas</span>
@@ -1418,7 +1421,7 @@
                 <label for="logistics-input-responsible-name" class="block text-xs font-bold uppercase tracking-wider text-[#0f3042] mb-1.5">
                   Responsable que Retira <span class="text-red-500">*</span>
                 </label>
-                <input type="text" id="logistics-input-responsible-name" list="datalist-names" class="form-input text-xs font-semibold" placeholder="EJ: Valeria Morales Rivas">
+                <input type="text" id="logistics-input-responsible-name" class="form-input text-xs font-semibold" placeholder="EJ: Valeria Morales Rivas">
               </div>
               <div>
                 <label for="logistics-input-responsible-id" class="block text-xs font-bold uppercase tracking-wider text-[#0f3042] mb-1.5">
@@ -1489,26 +1492,26 @@
             </div>
 
             <!-- Botones de Acción del Formulario -->
-            <div class="pt-4 border-t border-[#ede6de] flex flex-wrap items-center gap-2.5 justify-between">
-              <div class="flex items-center gap-2">
-                <button type="button" onclick="saveLogisticsPackage()" class="btn-primary text-xs py-2.5 px-4 font-bold shadow-xs cursor-pointer active:scale-95 flex items-center gap-1.5" title="Guardar este paquete en el control de logística">
+            <div class="pt-4 border-t border-[#ede6de] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+                <button type="button" onclick="saveLogisticsPackage()" class="btn-primary text-xs py-2.5 px-3.5 sm:px-4 font-bold shadow-xs cursor-pointer active:scale-95 flex items-center gap-1.5 flex-1 sm:flex-initial justify-center" title="Guardar este paquete en el control de logística">
                   <i class="fa-solid fa-floppy-disk"></i>
                   <span>Guardar en Logística</span>
                 </button>
                 
                 <!-- Botón ETIQUETAR (Destacado y siempre disponible, pulsa si está armado) -->
-                <button type="button" id="btn-logistics-label-action" onclick="labelCurrentLogisticsPackage()" class="text-xs py-2.5 px-4 font-extrabold rounded-xl transition-all flex items-center gap-1.5 bg-[#d87a86] hover:bg-[#ba5763] text-white shadow-xs cursor-pointer active:scale-95" title="Cargar directamente en la sección de Etiquetado para imprimir rótulos">
+                <button type="button" id="btn-logistics-label-action" onclick="labelCurrentLogisticsPackage()" class="text-xs py-2.5 px-3.5 sm:px-4 font-extrabold rounded-xl transition-all flex items-center gap-1.5 bg-[#d87a86] hover:bg-[#ba5763] text-white shadow-xs cursor-pointer active:scale-95 flex-1 sm:flex-initial justify-center" title="Cargar directamente en la sección de Etiquetado para imprimir rótulos">
                   <i class="fa-solid fa-tags"></i>
                   <span>Etiquetar</span>
                 </button>
               </div>
 
-              <div class="flex items-center gap-2">
-                <button type="button" onclick="printSingleLogisticsSheet()" class="btn-secondary text-xs py-2 px-3 text-[#0f3042] hover:bg-[#faebee] hover:border-[#d87a86] flex items-center gap-1.5 transition-colors font-bold shadow-2xs cursor-pointer" title="Imprimir hoja de materiales e ítems a armar">
+              <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+                <button type="button" onclick="printSingleLogisticsSheet()" class="btn-secondary text-xs py-2 px-3 text-[#0f3042] hover:bg-[#faebee] hover:border-[#d87a86] flex items-center gap-1.5 transition-colors font-bold shadow-2xs cursor-pointer flex-1 sm:flex-initial justify-center" title="Imprimir hoja de materiales e ítems a armar">
                   <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-[#0f3042]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4H7v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
                   <span>Imprimir Materiales</span>
                 </button>
-                <button type="button" onclick="resetLogisticsForm()" class="btn-secondary text-xs py-2 px-3 text-gray-500 hover:text-red-600 transition-colors" title="Limpiar formulario">
+                <button type="button" onclick="resetLogisticsForm()" class="btn-secondary text-xs py-2 px-3 text-gray-500 hover:text-red-600 transition-colors flex-1 sm:flex-initial justify-center" title="Limpiar formulario">
                   <span>Limpiar</span>
                 </button>
               </div>
@@ -1729,7 +1732,7 @@
                 <label for="label-input-responsible-name" class="block text-xs font-bold uppercase tracking-wider text-[#0f3042] mb-1.5">
                   Responsable que Retira <span class="text-red-500">*</span>
                 </label>
-                <input type="text" id="label-input-responsible-name" list="datalist-names" oninput="updateLiveLabelSheet()" class="form-input text-xs font-semibold" placeholder="EJ: Valeria Leones">
+                <input type="text" id="label-input-responsible-name" oninput="updateLiveLabelSheet()" class="form-input text-xs font-semibold" placeholder="EJ: Valeria Leones">
               </div>
               <div>
                 <label for="label-input-responsible-id" class="block text-xs font-bold uppercase tracking-wider text-[#0f3042] mb-1.5">
@@ -1962,34 +1965,29 @@
           <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
         </svg>
         <h3 class="text-lg font-bold text-gray-800">Iniciar sesión con Google</h3>
-        <p class="text-xs text-gray-500">Selecciona o ingresa una cuenta para continuar hacia INTYEVENTS</p>
+        <p class="text-xs text-gray-500">Acceso privado y confidencial para gestionar tus eventos</p>
       </div>
 
-      <!-- Cuentas usadas previamente en este computador (SOLO si existen) -->
-      <div id="modal-saved-accounts-container" class="space-y-2 py-3 border-b border-gray-100 hidden">
-        <span class="text-xs font-semibold text-[#0f3042] block flex items-center gap-1.5">
-          <i class="fa-solid fa-laptop text-[#d87a86]"></i> Cuentas registradas en este equipo:
-        </span>
-        <div id="modal-saved-accounts-list" class="space-y-1.5 max-h-40 overflow-y-auto pr-1">
-          <!-- Renderizado dinámico desde este equipo -->
+      <!-- Ingresar Cuenta con Autorrelleno Privado del Navegador -->
+      <form onsubmit="handleModalGoogleLogin(event)" class="pt-4 space-y-3.5">
+        <div class="space-y-3">
+          <div>
+            <label class="form-label text-xs font-bold text-gray-700">Correo Electrónico (Google) <span class="req">*</span></label>
+            <input type="email" id="google-custom-email" name="email" autocomplete="email" oninput="onGoogleModalEmailInput(this.value)" required placeholder="tu.correo@gmail.com" class="form-input text-xs py-2.5">
+            <span class="text-[10px] text-gray-400 mt-1 block">Tu dispositivo o navegador sugerirá tu cuenta de correo de forma automática y privada.</span>
+          </div>
+          <div>
+            <label class="form-label text-xs font-bold text-gray-700">Nombre Completo <span class="req">*</span></label>
+            <input type="text" id="google-custom-name" name="name" autocomplete="name" required placeholder="Tu Nombre y Apellido" class="form-input text-xs py-2.5">
+          </div>
         </div>
-      </div>
 
-      <!-- Ingresar Cuenta con Autorrelleno -->
-      <form onsubmit="handleModalGoogleLogin(event)" class="pt-3 space-y-3">
-        <span class="text-xs font-semibold text-gray-700 block">Ingresa tus datos para continuar:</span>
-        <div class="space-y-2">
-          <div>
-            <label class="form-label text-[11px]">Nombre Completo <span class="req">*</span></label>
-            <input type="text" id="google-custom-name" name="name" list="datalist-names" autocomplete="name" required placeholder="Tu Nombre y Apellido" class="form-input text-xs py-2">
-          </div>
-          <div>
-            <label class="form-label text-[11px]">Correo Electrónico (Google) <span class="req">*</span></label>
-            <input type="email" id="google-custom-email" name="email" list="datalist-google-emails" autocomplete="email" oninput="onGoogleModalEmailInput(this.value)" required placeholder="tu.correo@gmail.com" class="form-input text-xs py-2">
-            <span class="text-[10px] text-gray-400 mt-0.5 block">Autorrelleno habilitado: selecciona o escribe tus primeras letras para autocompletar.</span>
-          </div>
+        <div class="p-2.5 rounded-xl bg-emerald-50 border border-emerald-200/80 text-[11px] text-emerald-800 flex items-center gap-2">
+          <i class="fa-solid fa-lock text-emerald-600 shrink-0"></i>
+          <span>Inicio de sesión privado: no se comparten datos con otros usuarios.</span>
         </div>
-        <button type="submit" class="btn-primary w-full py-2.5 text-xs">
+
+        <button type="submit" class="btn-primary w-full py-2.5 text-xs font-bold">
           <span>Ingresar a Eventos</span>
         </button>
       </form>
@@ -2436,43 +2434,23 @@
     <option value="intyeventos@intylact.com">Dirección de Mercadeo INTYLACT</option>
   </datalist>
 
-  <!-- 2. Correos Google Predeterminados -->
-  <datalist id="datalist-google-emails">
-    <option value="samivivasintyeventos@intylact.com">Sami Vivas</option>
-    <option value="dixonmontillaintyeventos@intylact.com">Dixon Montilla</option>
-    <option value="intyeventos@intylact.com">Dirección de Mercadeo INTYLACT</option>
-    <option value="valerialeones@gmail.com">Valeria Leones (Fuccam)</option>
-    <option value="sportfit.venezuela@gmail.com">SportFit Venezuela C.A.</option>
-  </datalist>
-
-  <!-- 3. Nombres Predeterminados -->
-  <datalist id="datalist-names">
-    <option value="Sami Vivas">Sami Vivas</option>
-    <option value="Dixon Montilla">Dixon Montilla</option>
-    <option value="Valeria Leones">Valeria Leones</option>
-    <option value="SportFit Venezuela C.A.">SportFit Venezuela C.A.</option>
-    <option value="Fundación Concientización Cáncer de Mama FUCCAM">FUCCAM</option>
-  </datalist>
-
-  <!-- 4. Cédulas / Identificaciones -->
+  <!-- 2. Cédulas / Identificaciones Genéricas -->
   <datalist id="datalist-cedulas">
-    <option value="V- 32196229">V- 32196229 (Valeria Leones)</option>
-    <option value="V- 12345678">V- 12345678</option>
+    <option value="V- 12345678">Cédula Venezolano (V-)</option>
     <option value="V- 28456123">V- 28456123</option>
     <option value="V- 30124567">V- 30124567</option>
     <option value="J- 50123456-7">J- 50123456-7 (Rif Jurídico)</option>
     <option value="E- 84123456">E- 84123456 (Extranjero)</option>
   </datalist>
 
-  <!-- 5. Teléfonos / WhatsApp -->
+  <!-- 3. Teléfonos / WhatsApp Genéricos -->
   <datalist id="datalist-phones">
-    <option value="04126681611">04126681611 (Valeria Leones)</option>
     <option value="0412 1234567">0412 (Digitel)</option>
     <option value="0414 1234567">0414 (Movistar)</option>
     <option value="0424 1234567">0424 (Movistar)</option>
     <option value="0416 1234567">0416 (Movilnet)</option>
     <option value="0426 1234567">0426 (Movilnet)</option>
-    <option value="+58 412 6681611">+58 412 6681611 (Internacional)</option>
+    <option value="+58 412 1234567">+58 (Internacional)</option>
   </datalist>
 
   <!-- 6. Nombres de Eventos -->
