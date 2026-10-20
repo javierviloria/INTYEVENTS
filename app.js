@@ -595,8 +595,9 @@ function initApp() {
     navigateTo('landing');
   }
 
-  // Renderizar componentes de navegación
+  // Renderizar componentes de navegación y escuchar giros/cambios de pantalla
   renderUserNav();
+  window.addEventListener('resize', renderUserNav);
 }
 
 // Obtener listas frescas de Storage
@@ -1335,8 +1336,13 @@ function renderUserNav() {
       userProfile.style.display = 'flex';
     }
     if (userTabs) {
-      userTabs.classList.remove('hidden');
-      userTabs.style.display = 'flex';
+      if (window.innerWidth >= 768) {
+        userTabs.classList.remove('hidden');
+        userTabs.style.display = 'flex';
+      } else {
+        userTabs.classList.add('hidden');
+        userTabs.style.display = 'none';
+      }
     }
     if (mobileTabs) {
       mobileTabs.classList.remove('hidden');
@@ -1363,8 +1369,13 @@ function renderUserNav() {
       //    - Etiquetado
       // ----------------------------------------------------
       if (userTabs) {
-        userTabs.classList.remove('hidden');
-        userTabs.style.display = 'flex';
+        if (window.innerWidth >= 768) {
+          userTabs.classList.remove('hidden');
+          userTabs.style.display = 'flex';
+        } else {
+          userTabs.classList.add('hidden');
+          userTabs.style.display = 'none';
+        }
       }
       if (mobileTabs) {
         mobileTabs.classList.remove('hidden');
@@ -1419,8 +1430,13 @@ function renderUserNav() {
         landingActions.style.display = 'none';
       }
       if (userTabs) {
-        userTabs.classList.remove('hidden');
-        userTabs.style.display = 'flex';
+        if (window.innerWidth >= 768) {
+          userTabs.classList.remove('hidden');
+          userTabs.style.display = 'flex';
+        } else {
+          userTabs.classList.add('hidden');
+          userTabs.style.display = 'none';
+        }
       }
       if (mobileTabs) {
         mobileTabs.classList.remove('hidden');

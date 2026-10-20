@@ -594,9 +594,9 @@ img {
 
 /* 1. BANNERS INSTITUCIONALES (LOGO_TRANSPARENT.png) */
 .banner-nav {
-  height: 2.15rem; /* ~34px en teléfonos */
+  height: 2rem; /* ~32px en teléfonos */
   width: auto;
-  max-width: 155px;
+  max-width: 135px;
   object-fit: contain;
   background: transparent !important;
   border: none !important;
@@ -1133,3 +1133,38 @@ img {
     display: none !important;
   }
 }
+
+/* ==========================================================================
+   OPTIMIZACIÓN RESPONSIVE NAVBAR: BOTÓN CERRAR SESIÓN 100% VISIBLE EN MÓVILES
+   ========================================================================== */
+@media (max-width: 767px) {
+  /* En teléfonos y tablets pequeñas, las pestañas superiores NUNCA deben mostrarse en el navbar superior,
+     ya que se muestran exclusivamente en la barra inferior acoplada (#mobile-user-tabs).
+     Esto evita que desplacen hacia la derecha o corten el botón de Cerrar Sesión. */
+  #nav-user-tabs {
+    display: none !important;
+  }
+
+  /* Asegurar que el perfil y el botón de Cerrar Sesión SIEMPRE se muestren alineados a la derecha */
+  #nav-user-profile {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.4rem !important;
+    margin-left: auto !important;
+    flex-shrink: 0 !important;
+  }
+
+  /* Estilo del botón Cerrar Sesión en móviles */
+  #nav-user-profile button[onclick="logout()"] {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 0.35rem !important;
+    white-space: nowrap !important;
+    font-size: 11.5px !important;
+    padding: 0.45rem 0.75rem !important;
+    border-radius: 0.75rem !important;
+    flex-shrink: 0 !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06) !important;
+  }
+}
+
