@@ -1532,12 +1532,17 @@ function updateMobileModalElements(targetUrl) {
 function openMobileConnectModal() {
   const modal = document.getElementById('modal-mobile-connect');
 
-  // Si estamos en un dominio público (ej. trycloudflare), usar directamente ese origen
-  let connectUrl = window.location.protocol.startsWith('http') ? window.location.origin : 'http://127.0.0.1:8080';
+  // Determinar la URL para compartir en dispositivos móviles (compatible con GitHub Pages, dominios públicos y local)
+  let cleanUrl = window.location.href.split('#')[0].split('?')[0];
+  let isLocal = !window.location.protocol.startsWith('http') || 
+                window.location.hostname === 'localhost' || 
+                window.location.hostname === '127.0.0.1';
+
+  let connectUrl = isLocal ? 'http://127.0.0.1:8080' : cleanUrl;
   updateMobileModalElements(connectUrl);
 
-  // Consultar si hay un archivo tunnel_url.json activo con el enlace Cloudflare
-  if (window.location.protocol.startsWith('http')) {
+  // Si estamos en entorno local, consultar si hay un archivo tunnel_url.json activo con enlace Cloudflare
+  if (isLocal && window.location.protocol.startsWith('http')) {
     fetch('tunnel_url.json?t=' + Date.now())
       .then(res => res.json())
       .then(data => {
@@ -1554,6 +1559,25 @@ function openMobileConnectModal() {
 function closeMobileConnectModal() {
   const modal = document.getElementById('modal-mobile-connect');
   if (modal) modal.classList.add('hidden');
+}
+
+function shareMobileNative() {
+  const urlInput = document.getElementById('mobile-connect-url-input');
+  const targetUrl = (urlInput && urlInput.value) ? urlInput.value : window.location.href;
+
+  if (navigator.share) {
+    navigator.share({
+      title: 'Portal de Eventos INTYLACT®',
+      text: '¡Hola! Te comparto el enlace directo del Portal de Eventos INTYLACT® para abrir desde tu celular:',
+      url: targetUrl
+    }).catch(err => {
+      if (err.name !== 'AbortError') {
+        copyMobileUrl();
+      }
+    });
+  } else {
+    copyMobileUrl();
+  }
 }
 
 function copyMobileUrl() {

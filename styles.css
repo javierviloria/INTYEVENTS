@@ -1135,36 +1135,93 @@ img {
 }
 
 /* ==========================================================================
-   OPTIMIZACIÓN RESPONSIVE NAVBAR: BOTÓN CERRAR SESIÓN 100% VISIBLE EN MÓVILES
+   OPTIMIZACIÓN RESPONSIVE NAVBAR: LINK CELULAR Y CERRAR SESIÓN 100% VISIBLES EN MÓVILES
    ========================================================================== */
 @media (max-width: 767px) {
-  /* En teléfonos y tablets pequeñas, las pestañas superiores NUNCA deben mostrarse en el navbar superior,
-     ya que se muestran exclusivamente en la barra inferior acoplada (#mobile-user-tabs).
-     Esto evita que desplacen hacia la derecha o corten el botón de Cerrar Sesión. */
+  /* En teléfonos y tablets pequeñas, las pestañas de secciones se ubican en la barra inferior (#mobile-user-tabs).
+     Esto libera el espacio del encabezado para que el logo, Link Celular y Cerrar Sesión encajen a la perfección. */
   #nav-user-tabs {
     display: none !important;
   }
 
-  /* Asegurar que el perfil y el botón de Cerrar Sesión SIEMPRE se muestren alineados a la derecha */
-  #nav-user-profile {
+  /* Botón Link Celular: siempre visible, compacto y accesible al iniciar sesión en móviles */
+  #nav-btn-link-celular {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 0.25rem !important;
+    white-space: nowrap !important;
+    font-size: 11px !important;
+    padding: 0.4rem 0.6rem !important;
+    border-radius: 0.75rem !important;
+    flex-shrink: 0 !important;
+  }
+
+  /* Ocultar perfil en landing cuando el usuario no ha iniciado sesión */
+  #nav-user-profile.hidden {
+    display: none !important;
+  }
+
+  /* Perfil y botón Cerrar Sesión visibles al autenticarse en móviles */
+  #nav-user-profile:not(.hidden) {
     display: flex !important;
     align-items: center !important;
-    gap: 0.4rem !important;
+    gap: 0.35rem !important;
     margin-left: auto !important;
     flex-shrink: 0 !important;
+  }
+
+  /* Avatar optimizado para celulares */
+  #nav-user-profile .rounded-full {
+    padding: 0.15rem 0.25rem !important;
+    max-width: fit-content !important;
+  }
+
+  #nav-user-profile img#nav-user-avatar {
+    width: 1.5rem !important;
+    height: 1.5rem !important;
   }
 
   /* Estilo del botón Cerrar Sesión en móviles */
   #nav-user-profile button[onclick="logout()"] {
     display: inline-flex !important;
     align-items: center !important;
-    gap: 0.35rem !important;
+    gap: 0.3rem !important;
     white-space: nowrap !important;
-    font-size: 11.5px !important;
-    padding: 0.45rem 0.75rem !important;
+    font-size: 11px !important;
+    padding: 0.4rem 0.65rem !important;
     border-radius: 0.75rem !important;
     flex-shrink: 0 !important;
     box-shadow: 0 1px 3px rgba(0,0,0,0.06) !important;
   }
 }
+
+@media (max-width: 480px) {
+  .banner-nav {
+    max-width: 115px !important;
+    height: 1.85rem !important;
+  }
+}
+
+@media (max-width: 375px) {
+  .banner-nav {
+    max-width: 100px !important;
+    height: 1.75rem !important;
+  }
+  #nav-btn-link-celular {
+    font-size: 10.5px !important;
+    padding: 0.35rem 0.45rem !important;
+  }
+  #nav-user-profile button[onclick="logout()"] {
+    font-size: 10.5px !important;
+    padding: 0.35rem 0.55rem !important;
+  }
+}
+
+@media (max-width: 330px) {
+  .banner-nav {
+    max-width: 80px !important;
+    height: 1.6rem !important;
+  }
+}
+
 
